@@ -184,11 +184,11 @@ const sidebars = {
           type: 'category',
           label: 'Chapter 1: The Basics',
           items: [
-            'module-4/00-intro',
-            'module-4/01-lesson-1',
-            'module-4/02-lesson-2',
-            'module-4/03-lesson-3',
-            'module-4/04-summary',
+            'module-4/intro',
+            'module-4/lesson-1',
+            'module-4/lesson-2',
+            'module-4/lesson-3',
+            'module-4/summary',
           ],
         },
         {
