@@ -1,0 +1,99 @@
+/* HomepageAbout.module.css */
+
+.aboutSection {
+  padding: 5rem 2rem;
+  background: linear-gradient(
+    135deg,
+    rgba(12, 21, 39, 0.85) 0%,
+    rgba(12, 21, 39, 0.95) 100%
+  );
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+}
+
+/* About section heading */
+.sectionTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center; /* keep heading center-aligned */
+  margin-bottom: 3rem;
+  color: #e0e7ff; /* light blue glow */
+  line-height: 1.2;
+  text-shadow: 0 0 10px rgba(224, 231, 255, 0.8),
+               0 0 20px rgba(224, 231, 255, 0.6),
+               0 0 30px rgba(224, 231, 255, 0.4);
+}
+
+
+.statsRow {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+
+.aboutContent {
+  display: flex;
+  flex-direction: column; /* keep content stacked and centered */
+  align-items: center;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  z-index: 2;
+  text-align: center; /* center-align paragraphs */
+}
+
+/* Paragraph text */
+.aboutContent p {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: #d1d5db; /* light gray for readability */
+  margin-bottom: 1rem;
+}
+
+/* Image styling */
+.aboutImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  margin: 1rem auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .sectionTitle {
+    font-size: 2.25rem;
+  }
+
+  .aboutContent {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .aboutContent p {
+    font-size: 1rem;
+  }
+
+  .aboutImage {
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionTitle {
+    font-size: 1.75rem;
+  }
+
+  .aboutContent p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+}

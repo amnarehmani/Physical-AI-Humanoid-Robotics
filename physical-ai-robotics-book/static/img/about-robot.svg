@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="aboutRobotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3F51B5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2196F3;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow-small">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="100" height="100" fill="none"/>
+  <!-- Stylized Robot Head Outline -->
+  <path d="M30 40 L70 40 L80 60 L20 60 Z" fill="url(#aboutRobotGradient)" filter="url(#glow-small)"/>
+  <circle cx="50" cy="35" r="15" fill="url(#aboutRobotGradient)"/>
+  <!-- Antennas -->
+  <line x1="40" y1="20" x2="30" y2="10" stroke="#BBDEFB" stroke-width="2"/>
+  <line x1="60" y1="20" x2="70" y2="10" stroke="#BBDEFB" stroke-width="2"/>
+  <!-- Eye Light -->
+  <circle cx="50" cy="45" r="5" fill="#FFC107"/>
+  <text x="50" y="80" font-family="Arial" font-size="18" fill="#333" text-anchor="middle">AI</text>
+</svg>

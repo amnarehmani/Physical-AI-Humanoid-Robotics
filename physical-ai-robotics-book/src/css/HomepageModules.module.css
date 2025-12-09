@@ -1,0 +1,155 @@
+/* HomepageModules.module.css */
+
+.modulesSection {
+  padding: 8rem 0; /* More vertical padding */
+  background-color: var(--ifm-background-surface-color);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.sectionTitle {
+  font-size: 3.5rem; /* Larger title */
+  font-weight: 700;
+  margin-bottom: 5rem; /* More space below title */
+  color: var(--ifm-font-color-base);
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.4); /* Stronger neon glow */
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.modulesGrid {
+  display: flex; /* Use flexbox for one card per row */
+  flex-direction: column; /* Stack cards vertically */
+  gap: 3rem; /* More space between cards */
+  max-width: 1000px; /* Constrain width */
+  margin: 0 auto;
+}
+
+.moduleCard {
+  background-color: var(--ifm-background-color);
+  border: 2px solid var(--ifm-color-emphasis-200); /* Slightly thicker border */
+  border-radius: var(--ifm-border-radius-lg);
+  padding: 3rem 2.5rem; /* Ample padding, slightly more horizontal */
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother transition */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+  display: flex;
+  flex-direction: row; /* Horizontal layout for content within card */
+  align-items: center; /* Vertically align items in the row */
+  text-align: left; /* Text alignment within card */
+  position: relative;
+}
+
+.moduleCard:hover {
+  transform: translateY(-12px) scale(1.01); /* More pronounced lift and subtle scale */
+  box-shadow: 0 20px 40px rgba(0, 229, 255, 0.4), 0 0 25px var(--ifm-color-primary-light); /* Stronger, wider neon glow */
+  text-decoration: none;
+  color: var(--ifm-color-primary-light); /* Highlight text on hover */
+}
+
+.moduleCard .card__header {
+  flex-shrink: 0; /* Prevent icon/title from shrinking */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 2.5rem; /* Space between icon/title and description */
+  width: 120px; /* Fixed width for icon/title column */
+}
+
+.moduleIcon {
+  width: 80px; /* Even larger icon */
+  height: 80px;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.8)); /* Even stronger glow for icons */
+}
+
+.moduleTitle {
+  font-size: 2rem; /* Larger title */
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+  margin-bottom: 0.8rem;
+  font-family: 'Orbitron', sans-serif;
+  line-height: 1.2;
+}
+
+.moduleCard .card__body {
+  flex-grow: 1; /* Description takes remaining space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center description */
+  align-items: flex-start; /* Align text to left */
+  text-align: left;
+}
+
+.moduleCard .card__body p {
+  font-size: 1.05rem; /* Slightly larger description text */
+  line-height: 1.8;
+  color: var(--ifm-font-color-secondary);
+  margin-bottom: 1.5rem; /* Space before button */
+}
+
+.moduleCard .button {
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-background-color);
+  border-radius: 50px;
+  padding: 0.8rem 2.2rem; /* Larger button */
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+
+.moduleCard .button:hover {
+  background-color: var(--ifm-color-primary-dark);
+  color: var(--ifm-color-white);
+  box-shadow: 0 0 20px var(--ifm-color-primary-light);
+  transform: translateY(-3px);
+}
+
+/* Dark mode adjustments for cards (same as light mode for this theme) */
+[data-theme='dark'] .moduleCard {
+  background-color: var(--ifm-background-color);
+  border-color: var(--ifm-color-emphasis-800);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme='dark'] .moduleCard:hover {
+  box-shadow: 0 20px 40px rgba(0, 229, 255, 0.5), 0 0 25px var(--ifm-color-primary-lightest);
+}
+
+[data-theme='dark'] .moduleTitle {
+  color: var(--ifm-color-primary-lightest);
+}
+
+@media screen and (max-width: 996px) {
+  .modulesSection {
+    padding: 4rem 0;
+  }
+  .sectionTitle {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+  }
+  .modulesGrid {
+    gap: 2rem;
+  }
+  .moduleCard {
+    flex-direction: column; /* Stack vertically on mobile */
+    padding: 2rem;
+    text-align: center;
+  }
+  .moduleCard .card__header {
+    margin-right: 0;
+    margin-bottom: 1.5rem;
+    width: auto;
+  }
+  .moduleTitle {
+    font-size: 1.6rem;
+  }
+  .moduleIcon {
+    width: 60px;
+    height: 60px;
+  }
+}

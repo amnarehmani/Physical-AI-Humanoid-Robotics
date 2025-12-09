@@ -1,0 +1,81 @@
+/* HomepageAbout.module.css */
+
+.aboutSection {
+  padding: 8rem 0; /* Increased vertical padding for more impact */
+  background-color: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  text-align: left; /* Default text alignment */
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 3.5rem; /* Larger and bolder */
+  font-weight: 900;
+  margin-bottom: 5rem; /* More space below title */
+  color: var(--ifm-font-color-base);
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.4); /* Enhanced glow */
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.aboutContent {
+  display: flex;
+  align-items: center; /* Vertically align items */
+  justify-content: space-between;
+  gap: 5rem; /* Increased gap for better visual separation */
+  max-width: 1200px; /* Wider content area */
+  margin: 0 auto;
+}
+
+.aboutContent .col {
+  flex: 1;
+}
+
+.aboutContent p {
+  font-size: 1.25rem; /* Slightly larger text for readability */
+  line-height: 1.9; /* More relaxed line height */
+  margin-bottom: 2rem; /* More spacing between paragraphs */
+  color: var(--ifm-font-color-secondary);
+  font-weight: 300; /* Lighter weight for body text */
+}
+
+.aboutImage {
+  max-width: 100%; /* Ensure image scales within its column */
+  height: auto;
+  filter: drop-shadow(0 0 30px var(--ifm-color-primary-lightest)); /* Stronger neon glow for image */
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother, slightly slower transition */
+  /* CSS-only subtle floating effect */
+  animation: floatEffect 7s ease-in-out infinite alternate; /* Slower, more subtle float */
+}
+
+@keyframes floatEffect {
+  0% { transform: translateY(0px) rotate(0deg) scale(1); }
+  50% { transform: translateY(-8px) rotate(1deg) scale(1.02); } /* Slightly more pronounced float */
+  100% { transform: translateY(0px) rotate(0deg) scale(1); }
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .aboutImage {
+  filter: drop_shadow(0 0 30px var(--ifm-color-primary-light));
+}
+
+@media screen and (max-width: 996px) {
+  .aboutSection {
+    padding: 6rem 0;
+  }
+  .sectionTitle {
+    font-size: 3rem;
+  }
+  .aboutContent {
+    flex-direction: column-reverse; /* Text above image on mobile */
+    text-align: center;
+    gap: 3rem;
+  }
+  .aboutImage {
+    margin-top: 3rem;
+    max-width: 80%;
+  }
+  .aboutContent p {
+    font-size: 1.15rem;
+  }
+}

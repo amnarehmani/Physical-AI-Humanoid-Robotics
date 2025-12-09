@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0C1527;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1B2B45;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+  
+  <!-- Abstract Geometric Shapes -->
+  <g opacity="0.1" stroke="#00E0FF" stroke-width="1" fill="none">
+    <path d="M100 100 L300 100 L200 300 Z" transform="translate(50, 50)"/>
+    <rect x="800" y="200" width="200" height="200" transform="rotate(45 900 300)"/>
+    <circle cx="1500" cy="800" r="150"/>
+    <path d="M1600 200 L1800 200 L1800 400 L1600 400 Z" />
+    <path d="M200 800 L400 800 L300 600 Z" />
+  </g>
+
+  <!-- Connected Nodes -->
+  <g opacity="0.15" stroke="#00E0FF" stroke-width="0.5">
+    <line x1="200" y1="300" x2="800" y2="200"/>
+    <line x1="800" y1="200" x2="1500" y2="800"/>
+    <line x1="1500" y1="800" x2="300" y2="600"/>
+    <circle cx="200" cy="300" r="3" fill="#00E0FF"/>
+    <circle cx="800" cy="200" r="3" fill="#00E0FF"/>
+    <circle cx="1500" cy="800" r="3" fill="#00E0FF"/>
+    <circle cx="300" cy="600" r="3" fill="#00E0FF"/>
+  </g>
+  
+  <!-- Subtle Grid -->
+  <pattern id="smallGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#00E0FF" stroke-width="0.5" opacity="0.05"/>
+  </pattern>
+  <rect width="1920" height="1080" fill="url(#smallGrid)"/>
+</svg>

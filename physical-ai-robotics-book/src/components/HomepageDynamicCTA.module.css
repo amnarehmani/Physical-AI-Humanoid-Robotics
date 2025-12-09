@@ -1,0 +1,47 @@
+/* HomepageDynamicCTA.module.css */
+
+.dynamicCTA {
+  padding: 4rem 0;
+  background: linear-gradient(135deg, #0C1527, #0C1527); /* teal to blue gradient */
+  color: #ffffff;
+  text-align: center;
+  border-radius: 1rem;
+  margin: 4rem 0;
+}
+
+.ctaHeading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #e0e7ff; /* light blue glow */
+  text-shadow: 0 0 10px rgba(224, 231, 255, 0.8),
+               0 0 20px rgba(224, 231, 255, 0.6),
+               0 0 30px rgba(224, 231, 255, 0.4);
+}
+
+.ctaText {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  color: #e0f2fe; /* light teal/blue for contrast */
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.button--primary {
+  background-color: #fbbf24; /* yellow for high contrast CTA */
+  color: #111827;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.button--primary:hover {
+  background-color: #f59e0b;
+  transform: translateY(-2px);
+}
