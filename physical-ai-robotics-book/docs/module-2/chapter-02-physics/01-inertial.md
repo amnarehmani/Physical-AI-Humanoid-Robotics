@@ -11,6 +11,10 @@ keywords:
   - iyy
 ---
 
+export const xx = '{xx}';
+export const yy = '{yy}';
+export const zz = '{zz}';
+
 # Lesson 1: Mass and Inertia
 
 ## The Inertial Tag

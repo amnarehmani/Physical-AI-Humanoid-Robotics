@@ -31,7 +31,7 @@ const modules = [
   {
     title: 'Module 4: Vision-Language-Action (VLA)',
     description: 'Integrate Large Language Models (LLMs) with robotics, enabling voice commands, cognitive planning, and complex autonomous actions.',
-    link: '/docs/module-4/00-intro',
+    link: '/docs/module-4/intro', // ✅ corrected path
     icon: 'img/icon-vla.svg',
   },
 ];
