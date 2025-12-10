@@ -29,7 +29,7 @@ function ModuleCard({title, description, link, icon, index}) {
 
 export default function HomepageModules({modules}) {
   return (
-    <section className={styles.modulesSection} id="modules-overview">
+    <section className={styles.modulesSection} id="modules-section">
       <div className="container">
         <div className={styles.headerWrapper}>
           <Heading as="h2" className={styles.sectionTitle}>

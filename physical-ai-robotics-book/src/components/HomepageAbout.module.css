@@ -10,46 +10,73 @@
   color: #ffffff;
   position: relative;
   z-index: 1;
+  border-radius: 1rem;
+  overflow: hidden;
+  animation: fadeIn 1s ease forwards;
 }
 
 /* About section heading */
 .sectionTitle {
-  font-size: 2.5rem;
-  font-weight: 700;
-  text-align: center; /* keep heading center-aligned */
+  font-size: 3.5rem;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 2px;
+  text-align: center;
   margin-bottom: 3rem;
-  color: #e0e7ff; /* light blue glow */
+  color: #EAF6FF;
   line-height: 1.2;
-  text-shadow: 0 0 10px rgba(224, 231, 255, 0.8),
-               0 0 20px rgba(224, 231, 255, 0.6),
-               0 0 30px rgba(224, 231, 255, 0.4);
+  text-shadow: 0 0 20px rgba(0, 224, 255, 0.5);
+  animation: slideDown 1s ease forwards;
 }
 
-
+/* Stats row */
 .statsRow {
   display: flex;
   justify-content: center;
   gap: 3rem;
   margin-top: 2rem;
+  flex-wrap: wrap;
 }
 
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Orbitron', sans-serif;
+  animation: fadeIn 1.5s ease forwards;
+}
 
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #00e0ff;
+  text-shadow: 0 0 10px #00e0ff, 0 0 20px #00e0ff, 0 0 30px #00e0ff;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 1rem;
+  text-align: center;
+  color: #d1d5db;
+}
+
+/* About content wrapper */
 .aboutContent {
   display: flex;
-  flex-direction: column; /* keep content stacked and centered */
+  flex-direction: column;
   align-items: center;
   gap: 2rem;
   max-width: 800px;
   margin: 0 auto;
   z-index: 2;
-  text-align: center; /* center-align paragraphs */
+  text-align: center;
+  animation: fadeIn 1s ease forwards;
 }
 
 /* Paragraph text */
 .aboutContent p {
   font-size: 1.125rem;
   line-height: 1.75;
-  color: #d1d5db; /* light gray for readability */
+  color: #d1d5db;
   margin-bottom: 1rem;
 }
 
@@ -60,12 +87,13 @@
   border-radius: 1rem;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
   margin: 1rem auto;
+  animation: fadeIn 1.2s ease forwards;
 }
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .sectionTitle {
-    font-size: 2.25rem;
+    font-size: 3rem;
   }
 
   .aboutContent {
@@ -75,7 +103,7 @@
 
 @media (max-width: 768px) {
   .sectionTitle {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .aboutContent p {
@@ -89,11 +117,22 @@
 
 @media (max-width: 480px) {
   .sectionTitle {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
   }
 
   .aboutContent p {
     font-size: 0.95rem;
     line-height: 1.6;
   }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(20px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+
+@keyframes slideDown {
+  0% { opacity: 0; transform: translateY(-30px);}
+  100% { opacity: 1; transform: translateY(0);}
 }

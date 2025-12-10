@@ -22,7 +22,7 @@ export default function HomepageHero() {
           <div className={styles.buttons}>
             <Link
               className="button button--primary button--lg"
-              to="/docs/preface">
+              to="/#modules-section">
               ENTER THE FUTURE
             </Link>
           </div>

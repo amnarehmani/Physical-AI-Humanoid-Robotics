@@ -91,50 +91,15 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'About',
+            title: 'Navigation',
             items: [
-              { label: 'Preface', to: '/docs/preface' },
-              { label: 'The Author', to: '/#about-book' },
-              { label: 'Appendix', to: '/docs/appendix' },
-            ],
-          },
-          {
-            title: 'Modules',
-            items: [
-              { label: '1. ROS 2 System', to: '/docs/module-1/00-intro' },
-              { label: '2. Digital Twin', to: '/docs/module-2/00-intro' },
-              { label: '3. Isaac Sim AI', to: '/docs/module-3/00-intro' },
-              { label: '4. VLA Agents', to: '/docs/module-4/00-intro' },
-            ],
-          },
-          {
-            title: 'Code',
-            items: [
-              {
-                label: 'GitHub Repository',
-                href: 'https://github.com/your-org/physical-ai-robotics-book',
-              },
-              {
-                label: 'Examples',
-                href: 'https://github.com/your-org/physical-ai-robotics-book/tree/main/code',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'Discord',
-                href: 'https://discord.gg/placeholder',
-              },
-              {
-                label: 'Twitter / X',
-                href: 'https://twitter.com/placeholder',
-              },
+              { label: 'Home', to: '/' },
+              { label: 'About the Book', to: '/#about-book' }, // Anchor to About section
+              { label: 'Go to Book', to: '/#modules-section' }, // Direct link to content
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Physical AI & Humanoid Robotics Project. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Physical AI & Humanoid Robotics Project.`,
       },
       prism: {
         theme: prismThemes.github,
