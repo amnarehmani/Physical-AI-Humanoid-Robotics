@@ -12,56 +12,76 @@ keywords:
 
 # Lesson 3: Advanced Scatter
 
-## The Floating Object Problem
+## 1. Introduction
 
-If you just randomize `z` position between 0 and 1, objects might spawn inside the floor or floating in mid-air.
-We want objects to spawn, fall, collide, and settle naturally.
+Placing one object is easy. Placing 100 objects is hard.
+If you simply randomize `x,y` coordinates for 100 screws using `uniform()`, they will overlap. In the real world, matter cannot occupy the same space. If your dataset shows intersecting screws, the AI learns impossible physics.
 
-## Physics-Based Randomization
+We need a **Scatter Algorithm**.
 
-Replicator can work with the physics engine.
+## 2. Conceptual Understanding: Poisson Disk Sampling
 
-```python
-# 1. Spawn objects high up
-rep.modify.pose(position=rep.distribution.uniform((-1, 5, -1), (1, 10, 1)))
+To place objects naturally but randomly, we use sampling algorithms that respect:
+1.  **Bounds**: Stay on the floor.
+2.  **Collisions**: Don't touch each other.
+3.  **Density**: How crowded is the scene?
 
-# 2. Let physics run
-# The 'rep.step()' command waits for physics to settle before taking the photo.
+```text
+      [ Attempt Spawn at X,Y ]
+               |
+      [ Check Overlap? ] --(Yes)--> [ Retry ]
+               | (No)
+               v
+        [ Place Object ]
+               |
+        [ Count < N? ] --(Yes)--> [ Loop ]
 ```
 
-## Scatter2D
+## 3. Implementation: Scatter 2D
 
-For creating cluttered floors (screws, leaves, trash), use `rep.randomizer.scatter_2d`.
-
-```python
-plane = rep.create.plane(scale=5)
-screws = rep.create.from_usd("screw.usd", count=50)
-
-with rep.trigger.on_frame():
-    rep.randomizer.scatter_2d(
-        screws, 
-        surface=plane, 
-        check_collisions=True
-    )
-```
-This algorithm attempts to place the 50 screws on the plane without them overlapping.
-
-## Lights and Textures
-
-Don't forget to randomize the environment.
+Replicator provides a high-level function `scatter_2d`.
 
 ```python
-# Randomize Lights
-lights = rep.create.light(count=3)
-with rep.trigger.on_frame():
-    with lights:
-        rep.modify.attribute("intensity", rep.distribution.uniform(500, 3000))
-        rep.modify.attribute("color", rep.distribution.uniform((0,0,0), (1,1,1)))
+import omni.replicator.core as rep
+
+def scatter_screws():
+    # 1. The Surface
+    floor = rep.create.plane(scale=5)
+    
+    # 2. The Objects
+    # Load 50 instances of the screw asset
+    screws = rep.create.from_usd("assets/screw.usd", count=50)
+
+    # 3. The Logic
+    with rep.trigger.on_frame():
+        rep.randomizer.scatter_2d(
+            screws,
+            surface=floor,
+            check_collisions=True, # Critical!
+            no_coll_prims=[],
+            rotation=rep.distribution.uniform((-90, 0, 0), (-90, 360, 0)) # Screws lying flat
+        )
 ```
 
-## End-of-Lesson Checklist
+## 4. Physics-Based Settling
 
-- [ ] I can use `scatter_2d` to populate a surface.
-- [ ] I understand how collision checking prevents overlapping spawns.
-- [ ] I have randomized lighting conditions.
-- [ ] I have generated a dataset of a "Cluttered Floor."
+Usually, `scatter_2d` is purely geometric. For pile-ups (screws on top of screws), we need Physics.
+Replicator supports **Simulation Context**. You spawn objects high in the air, run physics for 60 frames (let them fall), *then* trigger the Writer.
+
+## 5. Engineering Insights: Headless Mode
+
+Running this GUI consumes GPU. When generating 100,000 images, we run **Headless**.
+```bash
+./isaac-sim.sh --no-window --python code/module-3/replicator/generate_dataset.py
+```
+This runs the simulation without rendering the GUI window, maximizing performance for the Annotators.
+
+## 6. Summary
+
+We have mastered Synthetic Data Generation.
+*   **Domain Randomization**: Varies the look.
+*   **Writers**: Saves the truth.
+*   **Scatter**: Creates the clutter.
+
+This dataset is now ready to train a YOLO or MaskRCNN model. This concludes Module 3. We have built the Brain (AI) and the Environment (Sim).
+In the final Module 4, we will integrate Language.

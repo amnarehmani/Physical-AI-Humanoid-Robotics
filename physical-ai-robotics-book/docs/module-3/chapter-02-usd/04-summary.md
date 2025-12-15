@@ -11,33 +11,42 @@ keywords:
 
 # Chapter 2 Summary
 
-## Recap
+## 1. The Language of the Metaverse
 
-In this chapter, we looked under the hood of Isaac Sim.
-*   **USD** is not just a file format; it's a scene composition engine.
-*   **Layers** allow non-destructive collaboration.
-*   **References** allow us to build complex worlds from reusable assets.
-*   **Prims** are the building blocks, and **Schemas** (like Physics) give them behavior.
+USD is the HTML of 3D worlds. Just as HTML describes the structure of a webpage, USD describes the structure of a simulation.
+In this chapter, we learned that:
+1.  **Prims** are the nouns (Objects).
+2.  **Attributes** are the adjectives (Properties).
+3.  **Schemas** are the verbs (Behaviors like Physics).
+4.  **Composition** is the grammar (How files fit together).
 
-Understanding this structure is what separates a casual user ("I drag and drop stuff") from a professional ("I generate 1000 variations of a scene programmatically").
+## 2. Key Takeaways
 
-## Future Outlook
+### The "Delta" Mindset
+Stop thinking about "saving a file." Start thinking about "recording an override."
+If you move a referenced robot, you aren't changing the robot file; you are recording a `Translate` delta on your local stage. This makes your workflow robust and reversible.
 
-Now that we can build the world, we need to generate data. In the next chapter, we will use **NVIDIA Replicator** to generate synthetic datasets for training Computer Vision models.
+### Python as a Wand
+We learned that anything you can do in the GUI, you can do in Python using the `pxr` library. This is critical for **Procedural Generation**. We can't drag-and-drop 1,000 trees for a forest scene. We write a loop.
 
-## Mini Quiz
+## 3. Mini Quiz
 
-1.  **What does USD stand for?**
-    *   *Answer: Universal Scene Description.*
+1.  **What is the Root of a USD hierarchy called?**
+    *   *Answer: The Stage.*
 
-2.  **What is the difference between a Prim and a Property?**
-    *   *Answer: A Prim is an object (Node); a Property is data on that object (Value).*
+2.  **If I delete a Referenced Prim in my scene, is the original file deleted?**
+    *   *Answer: No. You just remove the reference from your composition.*
 
-3.  **Why use a Reference instead of copying?**
-    *   *Answer: To keep the scene lightweight and auto-update when the source asset changes.*
+3.  **What is the difference between `UsdGeom.Cube` and `UsdPhysics.RigidBodyAPI`?**
+    *   *Answer: `Cube` is a concrete Type (it *is* a cube). `RigidBodyAPI` is an Applied Schema (it *has* physics).*
 
-4.  **What API do you apply to make a Prim fall under gravity?**
-    *   *Answer: `UsdPhysicsRigidBodyAPI`.*
+4.  **How does Isaac Sim approximate complex collision meshes?**
+    *   *Answer: Convex Hulls or V-HACD decomposition.*
 
-5.  **Who originally developed USD?**
-    *   *Answer: Pixar Animation Studios.*
+5.  **Which python library handles raw USD manipulation?**
+    *   *Answer: `pxr`.*
+
+## 4. What's Next?
+
+We have the tools to build worlds. Now we need to **Perceive** them.
+In **Chapter 3: Synthetic Data Generation (Replicator)**, we will turn our USD skills into an AI training factory. We will generate thousands of labeled images to train a neural network to detect our robot.

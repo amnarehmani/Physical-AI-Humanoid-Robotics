@@ -217,6 +217,7 @@
   .modulesGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
 }
 
 /* Desktop Breakpoint */
@@ -224,6 +225,7 @@
   .modulesGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+
 }
 
 @media (max-width: 768px) {
@@ -236,7 +238,7 @@
   }
 
   .sectionTitle {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
   }
 
   .cardContent {

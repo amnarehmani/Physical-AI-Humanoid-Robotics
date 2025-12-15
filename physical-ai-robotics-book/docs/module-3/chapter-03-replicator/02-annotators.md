@@ -13,46 +13,94 @@ keywords:
 
 # Lesson 2: Annotators and Writers
 
-## Annotators: The Sensors
+## 1. Introduction
 
-An **Annotator** extracts data from the scene.
-*   `rgb`: The normal image.
-*   `bounding_box_2d_tight`: Boxes around objects.
-*   `semantic_segmentation`: Color-coded pixels based on class.
-*   `distance_to_camera`: Depth map.
+Randomizing the world is useless if we don't capture the data.
+*   **Annotators**: Virtual sensors that "see" specific truths (Color, Depth, Class ID).
+*   **Writers**: Exporters that format this data for AI training (e.g., saving to disk in KITTI format).
 
-## Writers: The File Exporters
+## 2. Conceptual Understanding: The Annotator Pipeline
 
-A **Writer** takes the Annotator data and saves it to disk (JSON, PNG, NumPy).
+```text
+      [ 3D Scene ]
+           |
+           v
+      [ Render Product ] (Virtual Camera)
+           |
+      +----+------------------+------------------+
+      |                       |                  |
+   [ RGB ]              [ Semantic ]        [ BBox ]
+   (Pixel Colors)       (Pixel Class IDs)   (Min/Max Coords)
+      |                       |                  |
+      +----------+------------+                  |
+                 |                               |
+            [ Writer ]                           |
+                 |                               |
+        ( Saves to Disk )                        |
+      +----------+-----------+                   |
+      |          |           |                   |
+   001.png    001_seg.png   001.json             |
+                                                 v
+                                          [ Visualization ]
+                                          (Debug Draw in GUI)
+```
+
+## 3. Implementation: Saving Data
+
+We will extend our script to save the data.
 
 ```python
-# Create a Writer
+import omni.replicator.core as rep
+
+# ... (Previous Randomization Code) ...
+
+# 1. Create a Camera
+camera = rep.create.camera(position=(0, 5, 0), rotation=(-90, 0, 0))
+render_product = rep.create.render_product(camera, (1024, 1024))
+
+# 2. Configure the Writer
+# The 'BasicWriter' saves images and JSON metadata
 writer = rep.WriterRegistry.get("BasicWriter")
+writer.initialize(
+    output_dir="_output_data",
+    rgb=True,
+    bounding_box_2d_tight=True,
+    semantic_segmentation=True
+)
 
-# Configure output directory
-writer.initialize(output_dir="~/replicator_output", rgb=True, bounding_box_2d_tight=True)
-
-# Attach to Render Product (The Camera)
-render_product = rep.create.render_product("/World/Camera", (1024, 1024))
+# 3. Attach Writer to Camera
 writer.attach([render_product])
 
-# Run
+# 4. Run
 rep.orchestrator.run()
 ```
 
-## Visualizing Ground Truth
+## 4. Engineering Insights: Semantic Segmentation
 
-In Isaac Sim, switch the Viewport to "Sensors" mode.
-You can select "Semantic Segmentation" from the dropdown. You should see your randomized cubes as flat colors (e.g., all cubes are red, floor is blue).
-If everything is black, you forgot to set the Semantic Labels on your Prims.
+The most powerful annotator is **Semantic Segmentation**.
+It produces an image where the value of every pixel is the Class ID of the object it touches.
+*   Background = 0
+*   Cube = 1
+*   Robot = 2
 
-## Custom Writers
+**Why is this better than Bounding Boxes?**
+Bounding boxes are rectangles. Robots are not. If a robot is L-shaped, the bounding box includes a lot of empty air. Segmentation is pixel-perfect. It allows the robot to learn precise grasping points.
 
-The `BasicWriter` is generic. For training YOLO, you might need a custom writer that outputs `label.txt` files with normalized coordinates. Replicator allows you to write custom Python backends for this.
+## 5. Visualization
 
-## End-of-Lesson Checklist
+Before running a 10-hour generation job, **Verify** your data.
+In Isaac Sim:
+1.  Go to the Viewport.
+2.  Click `Render` -> `Annotators`.
+3.  Select `Semantic Segmentation`.
 
-- [ ] I can configure a Writer to save RGB images.
-- [ ] I can enable Bounding Box and Segmentation annotators.
-- [ ] I verify the output folder contains the generated files.
-- [ ] I can visualize the segmentation mask in the viewport.
+You should see your objects colored by class. If they are black, you forgot to add the `semantics=` tag when creating the object.
+
+## 6. Summary
+
+We have built the output end of the factory.
+*   **Render Products** define the resolution.
+*   **Annotators** define the data type.
+*   **Writers** define the file format.
+
+In the next lesson, we will tackle the final challenge: **Scattering**. How to drop 100 screws on the floor without them exploding.

@@ -1,4 +1,4 @@
---- 
+---
 id: m1-ch2-services
 title: "Lesson 1: Synchronous Services"
 sidebar_label: "Lesson 1: Services"
@@ -9,55 +9,84 @@ keywords:
   - client
   - server
   - python
+  - synchronous
+  - blocking
 ---
 
 # Lesson 1: Synchronous Services
 
-## The Request-Response Pattern
+## 1. Introduction
 
-In networking, the Client-Server model is ubiquitous. Your web browser (Client) requests a page, and the Google server (Server) responds. In ROS 2, **Services** implement this exact pattern.
+In the previous chapter, we built a robot that could stream data. But what if we need to ask our robot a specific question? "Are you calibrated?" "What is the battery level?" "Spawn a cube at coordinates (X, Y, Z)."
 
-Unlike Topics, which are Many-to-Many, Services are typically **One-to-One** (or One-Server-to-Many-Clients). A Service is defined by a pair of messages: one for the Request and one for the Response.
+Topics are ill-suited for this. If you publish "Spawn Cube" to a topic, you have no immediate way of knowing if it worked, or if the message was even received. You need a **transaction**.
 
-### When to use Services?
-*   **Short Duration**: The operation should be quick (calculations, state checks, toggles).
-*   **Reliability Required**: You need to know *for sure* that the command was received and processed.
-*   **Blocking**: The client often pauses (blocks) until the result is ready.
+This lesson introduces **Services**, the Request-Response mechanism of ROS 2. Mastering services is essential for building state machines, coordinating complex startups, and managing system configuration.
 
-:::warning
-**Do not use Services for long-running tasks.** If a service takes 5 seconds to compute, your robot's main loop might freeze waiting for the answer. Use Actions for long tasks.
-:::
+## 2. Conceptual Understanding: The Handshake
 
-## Implementing a Service Server
+**Intuition**:
+*   **Topic**: A radio host speaking. They don't know if you heard them.
+*   **Service**: A phone call. You dial (Request), they pick up, you ask a question, they answer (Response), and you hang up.
 
-Let's create a simple node that offers a service to "Add Two Ints". While trivial, it demonstrates the handshake perfectly.
+**Mechanism**:
+A Service is defined by a pair of messages:
+1.  **Request**: The data sent by the Client (e.g., `a=4, b=5`).
+2.  **Response**: The data returned by the Server (e.g., `sum=9`).
 
-### Step 1: Create the Server Node
+Unlike Topics, Services are **Synchronous** by default. The Client usually waits (blocks) until the Server responds. This "blocking" behavior is powerful but dangerous.
 
-Create a file named `simple_service_server.py`.
+## 3. System Perspective: The Transaction Flow
 
-```python
+Let's visualize the lifecycle of a Service call.
+
+```mermaid-text
+      [Client Node]                       [Server Node]
+           |                                    |
+           |  (1) Create Request object         |
+           |      req.a=4, req.b=5              |
+           |                                    |
+           |  (2) Send Request (DDS)            |
+           |----------------------------------->|
+           |                                    |
+           |                                    | (3) Trigger Callback
+           |      (WAITING / BLOCKING)          |     process_request(req)
+           |                                    |     res.sum = 9
+           |                                    |
+           |                                    | (4) Send Response
+           |<-----------------------------------|
+           |                                    |
+           |  (5) Unblock / Future Complete     |
+           |      print(res.sum)                |
+           |                                    |
+```
+
+## 4. Practical Example: The Adder
+
+We will implement a classic "Add Two Ints" server. While simple, it perfectly demonstrates the blocking nature of the pattern.
+
+### 4.1 The Server
+This node offers the service. It sits idle until called.
+
+```python title="code/module-1/simple_service_server.py"
 import rclpy
 from rclpy.node import Node
 from example_interfaces.srv import AddTwoInts
 
 class MinimalService(Node):
-
     def __init__(self):
         super().__init__('minimal_service')
-        # Create the Service
-        # name: 'add_two_ints'
-        # type: AddTwoInts
-        # callback: self.add_two_ints_callback
+        # Create Service: type, name, callback
         self.srv = self.create_service(AddTwoInts, 'add_two_ints', self.add_two_ints_callback)
         self.get_logger().info('Service "add_two_ints" is ready.')
 
     def add_two_ints_callback(self, request, response):
-        # This function runs whenever a request is received
+        # 1. Process Data
         response.sum = request.a + request.b
         self.get_logger().info(f'Incoming request\na: {request.a} b: {request.b}')
         
-        return response # Send response back to client
+        # 2. Return Response
+        return response
 
 def main(args=None):
     rclpy.init(args=args)
@@ -69,38 +98,23 @@ if __name__ == '__main__':
     main()
 ```
 
-### Step 2: Running the Server
+### 4.2 The Client
+This node sends the request.
 
-1.  Make sure your environment is sourced.
-2.  Run the node (assuming you added it to `setup.py` or run directly):
-    ```bash
-    python3 simple_service_server.py
-    ```
-    *Output: Service "add_two_ints" is ready.*
-
-## Implementing a Service Client
-
-Now we need a node to call this service.
-
-### Step 3: Create the Client Node
-
-Create a file named `simple_service_client.py`.
-
-```python
+```python title="code/module-1/simple_service_client.py"
 import sys
 import rclpy
 from rclpy.node import Node
 from example_interfaces.srv import AddTwoInts
 
 class MinimalClientAsync(Node):
-
     def __init__(self):
         super().__init__('minimal_client_async')
         self.cli = self.create_client(AddTwoInts, 'add_two_ints')
         
-        # Wait for service to be available
+        # 1. Check for Server availability
         while not self.cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('service not available, waiting again...')
+            self.get_logger().info('Service not available, waiting...')
         
         self.req = AddTwoInts.Request()
 
@@ -108,8 +122,12 @@ class MinimalClientAsync(Node):
         self.req.a = a
         self.req.b = b
         
-        # Async call - returns a Future object
+        # 2. Send Async Request
+        # Returns a "Future" object that will eventually hold the result
         self.future = self.cli.call_async(self.req)
+        
+        # 3. Wait for Future
+        # Note: We spin THIS node until the future completes
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
@@ -117,10 +135,8 @@ def main(args=None):
     rclpy.init(args=args)
     minimal_client = MinimalClientAsync()
     
-    # Send request 4 + 5
     response = minimal_client.send_request(4, 5)
-    minimal_client.get_logger().info(
-        f'Result of add_two_ints: {response.sum}')
+    minimal_client.get_logger().info(f'Result: {response.sum}')
 
     minimal_client.destroy_node()
     rclpy.shutdown()
@@ -129,32 +145,19 @@ if __name__ == '__main__':
     main()
 ```
 
-### Step 4: Execution
+## 5. Engineering Insights: The Danger of Blocking
 
-With the Server running in Terminal 1, run the Client in Terminal 2:
+In ROS 2, nodes are typically **Single Threaded**.
 
-```bash
-python3 simple_service_client.py
-```
+*   **The Trap**: If you call `client.call()` (synchronous), the *entire node freezes* while waiting for the response.
+*   **The Consequence**: If that same node receives `EmergencyStop` on a Topic while frozen, it will **not process the stop command** until the service returns. Your robot crashes.
+*   **The Solution**: Always use `call_async()`. While the request is pending, the node yields control back to the executor, allowing other callbacks (timers, topics) to run.
 
-**Terminal 2 Output:**
-`[INFO]: Result of add_two_ints: 9`
+## 6. Summary
 
-**Terminal 1 Output:**
-`[INFO]: Incoming request a: 4 b: 5`
+Services provide the transactional capability missing from Topics.
+1.  **Servers** provide logic on demand.
+2.  **Clients** consume logic and wait for results.
+3.  **Async** calls are mandatory for safety in single-threaded systems.
 
-## Deep Dive: Sync vs Async
-
-Notice we used `call_async`. Why?
-In ROS 2, nodes are typically single-threaded. If you use a synchronous call (`call()`), the client will block the entire thread waiting for a response. If the server is on the same thread (unlikely) or if the network hangs, your robot freezes.
-
-**Best Practice**: Always use `call_async` within a dedicated callback or a separate thread to ensure your robot can still process sensor data (Topics) while waiting for the Service response.
-
-## End-of-Lesson Checklist
-
-- [ ] I can explain the difference between a Topic and a Service.
-- [ ] I have successfully run the `AddTwoInts` server and client.
-- [ ] I understand why `call_async` is preferred over synchronous calls.
-- [ ] I know where to find standard service definitions (`ros2 interface list`).
-
-In the next lesson, we will tackle the more complex but powerful sibling of the Service: The Action.
+Services are great for quick questions ("What time is it?"). But what if the question takes 10 minutes to answer ("Go to the kitchen")? For that, we need **Actions**, which we cover next.

@@ -13,56 +13,77 @@ keywords:
 
 # Lesson 3: USD Physics
 
-## Physics Schemas
+## 1. Introduction
 
-USD is just data. To make it fall, we must apply **Physics Schemas** (APIs).
-*   `UsdPhysicsRigidBodyAPI`: Makes it move.
-*   `UsdPhysicsCollisionAPI`: Makes it solid.
-*   `UsdPhysicsMassAPI`: Gives it weight.
+A standard USD mesh is a ghost. It has no mass, no solidity, and gravity ignores it.
+To make it real, we must **Apply Schemas**.
+In USD, "being a Rigid Body" isn't a type; it's a trait (API) you apply to an existing Prim.
 
-## Applying Physics via Code
+## 2. Conceptual Understanding: The API Schema
+
+Think of API Schemas as "Capabilities" in a game.
+*   **Mesh Prim**: "I am a shape."
+*   **Apply RigidBodyAPI**: "Now I have mass and velocity."
+*   **Apply CollisionAPI**: "Now I can hit things."
+
+This separation allows us to turn physics on/off dynamically.
+
+## 3. Implementation: Applying Physics
 
 ```python
 from pxr import UsdPhysics
 
-# 1. Select the Prim
-cube = stage.GetPrimAtPath("/World/MyCube")
+# 1. Get the Prim
+cube_prim = stage.GetPrimAtPath("/World/MyCube")
 
-# 2. Make it a Rigid Body
-rigid_body_api = UsdPhysics.RigidBodyAPI.Apply(cube)
-rigid_body_api.CreateRigidBodyEnabledAttr(True)
+# 2. Apply Rigid Body (Motion)
+rb_api = UsdPhysics.RigidBodyAPI.Apply(cube_prim)
+rb_api.CreateRigidBodyEnabledAttr(True)
+rb_api.CreateKinematicEnabledAttr(False) # True = Animated by script, False = Physics
 
-# 3. Add Collision
-collision_api = UsdPhysics.CollisionAPI.Apply(cube)
-collision_api.CreateCollisionEnabledAttr(True)
+# 3. Apply Collision (Solidity)
+col_api = UsdPhysics.CollisionAPI.Apply(cube_prim)
+col_api.CreateCollisionEnabledAttr(True)
+col_api.CreateSimulationOwnerAttr(None)
 ```
 
-## Physics Materials
+## 4. Physics Materials
 
-Just like visual materials, we have Physics Materials (Friction, Restitution/Bounciness).
-You create a `PhysicsMaterial` Prim and bind it to the collision geometry.
+Friction and bounciness are defined in a **Physics Material** and bound to the prim.
 
 ```python
-# Create Material
-mat_path = "/World/PhysicsMaterials/Rubber"
-UsdShade.Material.Define(stage, mat_path)
-# ... set friction to 1.0 ...
+from pxr import UsdShade, UsdPhysics
 
-# Bind to Cube
-UsdShade.MaterialBindingAPI(cube).Bind(mat_prim)
+# Define Material
+mat_path = "/World/Materials/Rubber"
+mat_prim = UsdPhysics.MaterialAPI.Apply(stage.DefinePrim(mat_path, "Material"))
+mat_prim.CreateStaticFrictionAttr(1.0)
+mat_prim.CreateDynamicFrictionAttr(1.0)
+mat_prim.CreateRestitutionAttr(0.5) # Bounciness
+
+# Bind Material to Cube
+binding_api = UsdShade.MaterialBindingAPI.Apply(cube_prim)
+binding_api.Bind(
+    stage.GetPrimAtPath(mat_path), 
+    UsdShade.Tokens.physics # Bind specifically for physics purpose
+)
 ```
 
-## Debugging Physics
+## 5. Engineering Insights: Mesh Approximation
 
-In Isaac Sim, enable: `Physics -> Debug -> Show Colliders`.
-You will see purple lines.
-*   **Purple Box**: The collision shape.
-*   **Visible Mesh**: The render shape.
-If the purple box is missing, the object will fall through the floor.
+Using a 100k polygon mesh for collision is slow.
+Isaac Sim (PhysX) can auto-compute approximations.
+*   **Convex Hull**: Wraps the mesh in a tight skin. Good for general objects.
+*   **Bounding Box**: Fastest. Good for crates.
+*   **Mesh Decomposition (V-HACD)**: Breaks complex concave shapes (like a cup) into multiple convex hulls.
 
-## End-of-Lesson Checklist
+You configure this in the `MeshCollisionAPI`.
 
-- [ ] I can apply the Rigid Body API to a Prim.
-- [ ] I can apply the Collision API to a Prim.
-- [ ] I verify collision shapes using the Physics Debugger.
-- [ ] I understand that Visual and Physics geometries are separate in USD.
+## 6. Summary
+
+We have turned a USD file into a physical simulation.
+*   **Prims** hold the data.
+*   **References** assemble the scene.
+*   **Physics APIs** make it move.
+
+This concludes our deep dive into USD. In the next chapter, we will use **Replicator** to generate synthetic data for AI training.

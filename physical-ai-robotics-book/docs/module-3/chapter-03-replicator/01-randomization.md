@@ -12,50 +12,78 @@ keywords:
 
 # Lesson 1: Domain Randomization
 
-## The Replicator API
+## 1. Introduction
 
-We import the library as `rep`.
+We start with the core mechanic: **Randomization**.
+If we just take 1000 photos of a static cube, we have 1 data point (duplicated).
+If we move the cube 1000 times, we have 1000 data points.
+
+Replicator allows us to randomize properties (Pose, Color, Texture, Light) on every frame automatically.
+
+## 2. Conceptual Understanding: The Graph API
+
+Replicator is not imperative ("Do this now"). It is declarative ("Here is the rule").
+We build a **Computation Graph**.
+1.  **Select**: Pick the objects.
+2.  **Randomize**: Define the distribution.
+3.  **Trigger**: Define *when* to randomize (e.g., "Every Frame").
+
+## 3. Implementation: Randomizing a Cube
+
+Create `code/module-3/replicator/basic_randomizer.py`.
 
 ```python
 import omni.replicator.core as rep
 
-# 1. Define the items to randomize
-cube = rep.create.cube(semantics=[('class', 'cube')])
-plane = rep.create.plane(scale=10)
+def randomize_cube():
+    # 1. Create Assets
+    # 'semantics' labels this object for the neural network
+    cube = rep.create.cube(semantics=[('class', 'target_cube')])
+    light = rep.create.light(intensity=500, light_type="distant")
 
-# 2. Define the Randomization Logic
-with rep.trigger.on_frame(num_frames=10):
-    with cube:
-        # Randomize Position (X, Z)
-        rep.modify.pose(
-            position=rep.distribution.uniform((-2, 0, -2), (2, 0, 2)),
-            rotation=rep.distribution.uniform((0,0,0), (0,360,0))
-        )
-        # Randomize Color
-        rep.modify.attribute(
-            "inputs:diffuse_color", 
-            rep.distribution.color(repeating=1)
-        )
+    # 2. Define the Randomization Graph
+    # Run this logic 100 times
+    with rep.trigger.on_frame(num_frames=100):
+        
+        with cube:
+            # Randomize Position: Anywhere in a 2m x 2m box
+            rep.modify.pose(
+                position=rep.distribution.uniform((-1, 0, -1), (1, 0, 1)),
+                rotation=rep.distribution.uniform((0,0,0), (0,360,0)),
+                scale=rep.distribution.uniform(0.5, 1.5)
+            )
+            # Randomize Color: Any RGB color
+            rep.modify.attribute("inputs:diffuse_color", rep.distribution.color(repeating=1))
+
+        with light:
+            # Randomize Light Angle
+            rep.modify.pose(rotation=rep.distribution.uniform((0,0,0), (360,360,360)))
+            # Randomize Intensity (Dim to Bright)
+            rep.modify.attribute("intensity", rep.distribution.uniform(200, 1000))
+
+# Execute
+randomize_cube()
 ```
 
-## Triggers
+## 4. Distributions
 
-*   `rep.trigger.on_frame(num_frames=100)`: Runs for 100 frames then stops.
-*   `rep.trigger.on_time(interval=1.0)`: Runs every second.
+The power comes from the math distributions.
+*   **`uniform(min, max)`**: Flat probability. Good for position.
+*   **`normal(mean, std)`**: Bell curve. Good for size (most screw are standard size, some are defective).
+*   **`choice([list])`**: Pick one. Good for textures ("Wood", "Metal", "Plastic").
 
-## Distributions
+## 5. Engineering Insights: Semantic Labeling
 
-*   `uniform(min, max)`: Any value between min and max.
-*   `normal(mean, std)`: Gaussian distribution.
-*   `choice([A, B, C])`: Pick one from the list.
+Notice `semantics=[('class', 'target_cube')]`.
+This is crucial. The computer vision model doesn't know what a "Cube" prim is. It only knows labels.
+We map the USD Prim to a **Class Label** ("target_cube"). The Annotator will later read this and draw a bounding box labeled "target_cube".
 
-## Semantics
+## 6. Summary
 
-Note the `semantics=[('class', 'cube')]`. This adds a tag to the USD Prim. The "Annotators" (Lesson 2) use this tag to know "This pixel belongs to a Cube."
+We have created a script that generates 100 unique variations of a cube scene.
+*   **Position** changes $\rightarrow$ Net learns translation invariance.
+*   **Rotation** changes $\rightarrow$ Net learns rotation invariance.
+*   **Color** changes $\rightarrow$ Net learns shape focus.
+*   **Lighting** changes $\rightarrow$ Net learns robustness to shadows.
 
-## End-of-Lesson Checklist
-
-- [ ] I can write a script to create a simple shape.
-- [ ] I can randomize the position and rotation of that shape.
-- [ ] I can use `rep.trigger` to control how many frames are generated.
-- [ ] I understand why we need to add Semantic Labels to objects.
+In the next lesson, we will learn how to capture this data and save it as a dataset.

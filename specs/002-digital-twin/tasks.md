@@ -17,8 +17,8 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create documentation structure docs/module-2/
-- [ ] T002 Create code directory structure code/module-2/launch/ code/module-2/urdf/ code/module-2/unity_scripts/
+- [x] T001 Create documentation structure docs/module-2/
+- [x] T002 Create code directory structure code/module-2/launch/ code/module-2/urdf/ code/module-2/unity_scripts/
 
 ---
 
@@ -26,9 +26,9 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T003 Create Lesson 1 placeholder file docs/module-2/lesson-1-physics.md
-- [ ] T004 Create Lesson 2 placeholder file docs/module-2/lesson-2-sensors.md
-- [ ] T005 Create Lesson 3 placeholder file docs/module-2/lesson-3-unity.md
+- [x] T003 Create Lesson 1 placeholder file docs/module-2/lesson-1-physics.md
+- [x] T004 Create Lesson 2 placeholder file docs/module-2/lesson-2-sensors.md
+- [x] T005 Create Lesson 3 placeholder file docs/module-2/lesson-3-unity.md
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -42,10 +42,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Write Lesson 1 Section: Introduction to Physics Engines in docs/module-2/lesson-1-physics.md
-- [ ] T007 [US1] Create simulation.launch.py in code/module-2/launch/simulation.launch.py (Basic spawn only)
-- [ ] T008 [US1] Write Lesson 1 Section: Setting up the World (Gravity, Ground Plane) in docs/module-2/lesson-1-physics.md
-- [ ] T009 [US1] Write Lesson 1 Section: Launching the Simulation (Referencing launch file) in docs/module-2/lesson-1-physics.md
+- [x] T006 [P] [US1] Write Lesson 1 Section: Introduction to Physics Engines in docs/module-2/lesson-1-physics.md
+- [x] T007 [US1] Create simulation.launch.py in code/module-2/launch/simulation.launch.py (Basic spawn only)
+- [x] T008 [US1] Write Lesson 1 Section: Setting up the World (Gravity, Ground Plane) in docs/module-2/lesson-1-physics.md
+- [x] T009 [US1] Write Lesson 1 Section: Launching the Simulation (Referencing launch file) in docs/module-2/lesson-1-physics.md
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -59,10 +59,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 [P] [US2] Write Lesson 2 Section: Principles of Perception (LiDAR, Camera, IMU) in docs/module-2/lesson-2-sensors.md
-- [ ] T011 [US2] Create sensors.xacro in code/module-2/urdf/sensors.xacro (Gazebo plugins)
-- [ ] T012 [US2] Update simulation.launch.py to include sensors.xacro and bridge configuration in code/module-2/launch/simulation.launch.py
-- [ ] T013 [US2] Write Lesson 2 Section: Simulating Sensors with Plugins in docs/module-2/lesson-2-sensors.md
+- [x] T010 [P] [US2] Write Lesson 2 Section: Principles of Perception (LiDAR, Camera, IMU) in docs/module-2/lesson-2-sensors.md
+- [x] T011 [US2] Create sensors.xacro in code/module-2/urdf/sensors.xacro (Gazebo plugins)
+- [x] T012 [US2] Update simulation.launch.py to include sensors.xacro and bridge configuration in code/module-2/launch/simulation.launch.py
+- [x] T013 [US2] Write Lesson 2 Section: Simulating Sensors with Plugins in docs/module-2/lesson-2-sensors.md
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -76,10 +76,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T014 [P] [US3] Write Lesson 3 Section: The Digital Twin Concept in docs/module-2/lesson-3-unity.md
-- [ ] T015 [US3] Create RobotController.cs in code/module-2/unity_scripts/RobotController.cs
-- [ ] T016 [US3] Write Lesson 3 Section: Setting up Unity Robotics Hub in docs/module-2/lesson-3-unity.md
-- [ ] T017 [US3] Write Lesson 3 Section: Creating the Bridge (ROS-TCP-Connector) in docs/module-2/lesson-3-unity.md
+- [x] T014 [P] [US3] Write Lesson 3 Section: The Digital Twin Concept in docs/module-2/lesson-3-unity.md
+- [x] T015 [US3] Create RobotController.cs in code/module-2/unity_scripts/RobotController.cs
+- [x] T016 [US3] Write Lesson 3 Section: Setting up Unity Robotics Hub in docs/module-2/lesson-3-unity.md
+- [x] T017 [US3] Write Lesson 3 Section: Creating the Bridge (ROS-TCP-Connector) in docs/module-2/lesson-3-unity.md
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -89,9 +89,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T018 [P] Review all content for clarity and tone (Constitution check)
-- [ ] T019 Verify code examples run on ROS 2 Humble + Gazebo Fortress + Unity 2021.3+
-- [ ] T020 Run quickstart.md validation manually
+- [x] T018 [P] Review all content for clarity and tone (Constitution check)
+- [x] T019 Verify code examples run on ROS 2 Humble + Gazebo Fortress + Unity 2021.3+
+- [x] T020 Run quickstart.md validation manually
 
 ---
 

@@ -14,104 +14,74 @@ keywords:
 
 # Lesson 2: Simulating Perception (Sensors)
 
-<h2>2.1 How Sensors Work in Simulation</h2>
+## 1. Introduction
 
-Real sensors are messy. They have noise, dropout, and lens flares.
-Simulated sensors are mathematical projections.
-*   **LiDAR**: Raycasting. "Shoot 360 lines. Distance = Time * Speed of Light."
-*   **Camera**: Rendering. "Draw the scene from this POV to a texture buffer."
-*   **IMU**: Physics query. "What is the current acceleration vector of this link?"
+A robot without sensors is a hallucination. It moves assuming the world is exactly as it predicts, but the moment it slips or hits an obstacle, that prediction fails. To close the loop, we need **Perception**.
 
-To simulate these in Gazebo, we use **Plugins**.
+In the previous lesson, we built the "Physics Playground" where our robot exists. Now, we will give it senses:
 
-<h2>2.2 Adding Plugins to URDF</h2>
+1. **LiDAR**: To feel the geometry of the room.  
+2. **Camera**: To see the texture of objects.  
+3. **IMU**: To feel gravity and acceleration.
 
-Gazebo doesn't magically know a box is a camera. We must tell it by adding `<gazebo>` tags to our URDF/XACRO file.
+Simulating sensors is computationally expensive. It requires the computer to calculate millions of light interactions per second. In this lesson, we will learn how to add these sensors efficiently using **Gazebo Plugins** and bridge their data back to ROS 2.
 
-Let's create a separate file `sensors.xacro` to keep our robot definition clean.
+---
 
-```xml title="code/module-2/urdf/sensors.xacro"
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+## 2. Conceptual Understanding: Synthetic Senses
 
-  <!-- ========================================= -->
-  <!-- 1. LiDAR Sensor Plugin                    -->
-  <!-- ========================================= -->
-  <gazebo reference="lidar_link">
-    <sensor name="lidar" type="gpu_lidar">
-      <always_on>true</always_on>
-      <visualize>true</visualize> <!-- Show blue rays in Gazebo -->
-      <update_rate>10</update_rate> <!-- 10 Hz -->
-      <topic>scan</topic> <!-- Publish to /scan -->
-      <ray>
-        <scan>
-          <horizontal>
-            <samples>360</samples>
-            <resolution>1</resolution>
-            <min_angle>-3.14</min_angle> <!-- -180 deg -->
-            <max_angle>3.14</max_angle>  <!-- +180 deg -->
-          </horizontal>
-        </scan>
-        <range>
-          <min>0.1</min>
-          <max>10.0</max>
-        </range>
-      </ray>
-    </sensor>
-  </gazebo>
+How do we simulate a sensor? We don't simulate individual photons (that would take years to render one frame). Instead, we use mathematical approximations.
 
-  <!-- ========================================= -->
-  <!-- 2. Camera Sensor Plugin                   -->
-  <!-- ========================================= -->
-  <gazebo reference="camera_link">
-    <sensor name="camera" type="camera">
-      <update_rate>30</update_rate>
-      <topic>camera/image_raw</topic>
-      <camera>
-        <horizontal_fov>1.047</horizontal_fov> <!-- 60 deg FOV -->
-        <image>
-          <width>640</width>
-          <height>480</height>
-        </image>
-        <clip>
-          <near>0.1</near>
-          <far>100</far>
-        </clip>
-      </camera>
-    </sensor>
-  </gazebo>
+### 2.1 LiDAR (Raycasting)
 
-  <!-- ========================================= -->
-  <!-- 3. IMU Sensor Plugin                      -->
-  <!-- ========================================= -->
-  <gazebo reference="imu_link">
-    <sensor name="imu" type="imu">
-      <always_on>true</always_on>
-      <update_rate>100</update_rate>
-      <topic>imu/data</topic>
-    </sensor>
-  </gazebo>
+A real LiDAR spins a laser and measures the time-of-flight for reflections.  
+A simulated LiDAR uses **Raycasting**. The physics engine shoots a mathematical line from the sensor origin and calculates the intersection point with the nearest collision mesh.
 
-</robot>
-```
+`Distance = || Point_hit - Point_origin ||`
 
-<h2>2.3 Exercise: Verifying Data</h2>
+This approach is fast but unrealistically perfect. Real LiDARs suffer from noise, surface absorption, and reflection errors on glass or dark materials. Gazebo allows us to inject **Gaussian Noise** to better approximate real-world behavior.
 
-Once you spawn a robot equipped with these plugins (by including `sensors.xacro` in your main URDF), Gazebo starts broadcasting.
+---
 
-1.  **Visualize LiDAR**: In Gazebo, you will see flickering blue lines coming from your robot.
-2.  **Check Topics**:
-    ```bash
-    ros2 topic list
-    ```
-    *Expect:* `/scan`, `/camera/image_raw`, `/imu/data`.
+### 2.2 Cameras (Rasterization)
 
-3.  **Inspect Data**:
-    ```bash
-    ros2 topic echo /scan
-    ```
-    *Result:* A wall of numbers scrolling by. This is what the robot "sees".
+A simulated camera is essentially a 3D render. Gazebo positions a virtual camera at the sensor link’s frame, renders the scene to an off-screen buffer, and copies that pixel buffer into a ROS message.
 
-:::info Note on Bridges
-Remember the `ros_gz_bridge` from Lesson 1? You must ensure it is configured to bridge these specific topics, or ROS 2 won't hear Gazebo's shouting.
-:::
+**Note**: This is the most CPU/GPU-intensive sensor.  
+Higher resolution directly reduces frame rate and increases latency.
+
+---
+
+### 2.3 IMU (Inertial Measurement Unit)
+
+The IMU is unique because it does not observe the external world; it measures the robot’s internal motion state.
+
+- **Accelerometer**: Measures linear acceleration (including gravity)
+- **Gyroscope**: Measures angular velocity
+
+Gazebo computes IMU values directly from the physics state of the link to which the IMU is attached.
+
+---
+
+## 3. System Perspective: The Plugin Architecture
+
+Gazebo runs as a separate process from ROS 2 and does not natively understand ROS concepts like topics or messages. To bridge this gap, we use **Plugins**.
+
+A plugin is a C++ library attached to a simulated model.
+
+1. **Sensor Plugin**: Generates raw data (e.g., `gpu_lidar`)
+2. **ROS Bridge**: `ros_gz_bridge` transfers messages between Gazebo and ROS 2
+
+```text
++---------------------+       +---------------------------+       +---------------------+
+|      ROS 2          |       |      ROS_GZ_BRIDGE        |       |   Gazebo Fortress   |
+|                     |       |                           |       |                     |
+|  [Nav Stack]        |       |                           |       |  [Robot Model]      |
+|    Sub: /scan       +<------+ /scan <--------- /scan    +<------+    [Lidar Plugin]   |
+|                     |       |                           |       |      (Raycast)      |
+|  [Computer Vision]  |       |                           |       |                     |
+|    Sub: /image_raw  +<------+ /image <-------- /image   +<------+    [Camera Plugin]  |
+|                     |       |                           |       |      (Render)       |
+|  [EKF Filter]       |       |                           |       |                     |
+|    Sub: /imu        +<------+ /imu <---------- /imu     +<------+    [IMU Plugin]     |
++---------------------+       +---------------------------+       +---------------------+

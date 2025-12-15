@@ -12,44 +12,70 @@ keywords:
 
 # Lesson 3: Fault Injection
 
-## Breaking Things on Purpose
+## 1. Introduction
 
-A Digital Twin is most useful when it tests things that are dangerous or expensive to test in reality.
-*   **Motor Failure**: What happens if the right wheel stops?
-*   **Sensor Blindness**: What happens if the camera goes black?
-*   **Environment Change**: What happens if the lights go out?
+"It works on my machine."
+This phrase kills robotics startups. A robot that only works in perfect conditions is useless.
+To build robust **Physical AI**, we must practice **Chaos Engineering**. We intentionally break things in the simulation to see if the AI survives.
 
-## Simulating Motor Failure
+## 2. Conceptual Understanding: The Failure Matrix
 
-We can simulate a dead motor by effectively "unplugging" the bridge command for one wheel, or by sending a `0` velocity command continuously on a high-priority override topic.
+We categorize failures into three types:
 
-Better yet, we can use a Gazebo plugin to detach the joint.
-Or, simply set the friction of the wheel to `0` (simulating ice/oil slick).
+1.  **Sensor Failure**: The Lidar goes black. The IMU drifts to infinity.
+2.  **Actuator Failure**: A motor stalls. A wheel slips.
+3.  **Environmental Failure**: The lights turn off. A shelf falls over.
 
-```bash
-# Example: Change friction at runtime via Gazebo Service
-gz service -s /world/warehouse/set_parameter ...
+In a Digital Twin, we can trigger these events programmatically.
+
+## 3. System Perspective: The Chaos Node
+
+We create a dedicated ROS node: `chaos_monkey`.
+
+```text
+      [ Chaos Node ]
+           |
+    (Timer Trigger)
+           |
+           v
+    [ Select Victim ] --> (Robot Beta)
+           |
+           v
+    [ Select Fault ] --> (Blind Camera)
+           |
+           v
+    [ Execute ] --> (Spawn box in front of lens)
 ```
 
-## Simulating Sensor Noise/Failure
+## 4. Implementation: Triggering Faults
 
-We can modify the sensor noise parameters at runtime or cover the sensor with a visual object.
-A simple way to test "Camera Blindness" is to spawn a black box directly in front of the camera link.
+### 4.1 Blindness (Sensor)
+We can "blind" a robot by spawning a small black box rigidly attached to its camera link.
+`create -name lens_cap -parent robot_beta/camera_link ...`
 
-## The Chaos Script
+### 4.2 Slippage (Actuator)
+We can simulate an oil spill by changing the friction of the floor dynamically using Gazebo services.
 
-Write a Python script `chaos_monkey.py`:
-1.  Wait for simulation to start.
-2.  Wait 10 seconds.
-3.  Spawn a box in front of Bot 1.
-4.  Wait 10 seconds.
-5.  Teleport Bot 2 to a random location.
+### 4.3 The Kidnapped Robot (Environment)
+We can teleport the robot to a random location. This breaks the AMCL localization (the robot thinks it's at A, but it's at B).
+Does your navigation stack realize the scan doesn't match the map? Does it trigger global relocalization? Or does it crash into a wall?
 
-Running this alongside your navigation stack tests if your robot can recover from "Kidnapping" and "Dynamic Obstacles."
+```python
+# python code to teleport robot
+msg = Pose()
+msg.position.x = 10.0 # Teleport far away
+publisher.publish(msg)
+```
 
-## End-of-Lesson Checklist
+## 5. Engineering Insights: Regression Testing
 
-- [ ] I understand the value of "Chaos Engineering" in simulation.
-- [ ] I can simulate a sensor failure (e.g., by blocking it).
-- [ ] I have written a script to inject a fault into the running simulation.
-- [ ] I have observed how my navigation stack reacts to these faults.
+When you fix a bug, add a **Regression Test** in simulation.
+*   *Bug*: Robot crashed when a human walked in front of it.
+*   *Test*: Create a launch file that spawns the robot and a moving actor on a collision course. Run this test before every code release (CI/CD).
+
+## 6. Summary
+
+A simulator is not just for checking if code works. It is for checking what happens when things **don't** work.
+By injecting faults, we move from "Code Verification" to "System Validation."
+
+In the final summary, we will wrap up the entire module and prepare to hand over the robot to the Navigation team.

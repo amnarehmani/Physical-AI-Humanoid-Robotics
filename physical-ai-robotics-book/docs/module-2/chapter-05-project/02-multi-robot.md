@@ -12,58 +12,97 @@ keywords:
 
 # Lesson 2: Multi-Robot Launch
 
-## The Namespace Problem
+## 1. Introduction
 
-If you spawn two robots, they both try to publish to `/scan` and `/odom`. The data gets mixed up.
-We need **Namespaces**: `/bot1/scan`, `/bot2/scan`.
+In a real warehouse, there isn't just one robot; there are hundreds.
+If we launch two robots with the default configuration, they will both publish to `/scan` and `/cmd_vel`. Robot A's sensor data will control Robot B. Chaos.
 
-## TF Prefixing
+To solve this, we use **ROS Namespaces** and **TF Prefixes**.
 
-We also have a TF problem. Both robots have a `base_link`. The TF tree cannot have two frames with the same name.
-We must prefix the frames: `bot1/base_link`, `bot2/base_link`.
+## 2. Conceptual Understanding: The Namespace Tree
 
-## The Launch Strategy
+Namespaces segregate the ROS graph.
 
-We create a "Group Action" in our launch file for each robot.
+**Without Namespaces:**
+*   `/cmd_vel` (Ambiguous)
+*   `/scan` (Ambiguous)
+
+**With Namespaces:**
+*   `/worker_1/cmd_vel`
+*   `/worker_1/scan`
+*   `/worker_2/cmd_vel`
+*   `/worker_2/scan`
+
+Each robot becomes a self-contained island.
+
+## 3. System Perspective: TF Prefixing
+
+The Transform (TF) tree is global. We cannot have two `base_link` frames.
+We must prefix the frame IDs:
+*   `worker_1/base_link`
+*   `worker_2/base_link`
+
+This requires changing the **Robot State Publisher** configuration during launch.
+
+## 4. Implementation: The Launch Logic
+
+We use `PushRosNamespace` in our Python launch file.
 
 ```python
-# multi_bot.launch.py
-def generate_launch_description():
-    
-    # Robot 1
-    bot1 = GroupAction([
-        PushRosNamespace('bot1'),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource('spawn_robot.launch.py'),
-            launch_arguments={'x': '0', 'y': '0', 'name': 'bot1'}.items()
+# code/module-2/launch/multi_warehouse.launch.py
+
+from launch.actions import GroupAction
+from launch_ros.actions import PushRosNamespace
+
+def spawn_robot(name, x, y):
+    return GroupAction([
+        PushRosNamespace(name), # Everything inside this block gets /name prefix
+        
+        # 1. State Publisher (Remaps frame_id)
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            parameters=[{
+                'robot_description': urdf,
+                'frame_prefix': name + '/' # Crucial for TF!
+            }]
+        ),
+        
+        # 2. Spawn Entity (Gazebo)
+        Node(
+            package='ros_gz_sim',
+            executable='create',
+            arguments=['-name', name, '-x', str(x), '-y', str(y), '-topic', 'robot_description']
         )
     ])
 
-    # Robot 2
-    bot2 = GroupAction([
-        PushRosNamespace('bot2'),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource('spawn_robot.launch.py'),
-            launch_arguments={'x': '2', 'y': '0', 'name': 'bot2'}.items()
-        )
+def generate_launch_description():
+    return LaunchDescription([
+        spawn_robot('robot_alpha', 0.0, 0.0),
+        spawn_robot('robot_beta',  2.0, 0.0)
     ])
-    
-    return LaunchDescription([bot1, bot2])
 ```
 
-## Configuring the Bridge
+## 5. Engineering Insights: The Bridge Wildcard
 
-The bridge also needs to know about namespaces.
+We also need to bridge these new topics. Writing a YAML entry for every robot is tedious.
+Modern `ros_gz_bridge` supports **Templates**.
+
 ```yaml
-- topic_name: "/bot1/cmd_vel"
+# bridge.yaml
+- topic_name: "/<robot_name>/cmd_vel"
   ros_type_name: "geometry_msgs/msg/Twist"
   gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
 ```
-Or use wildcards (if supported by your bridge version) or generate the YAML dynamically in the launch file.
+*Note: Support for templates varies by ROS distribution. In Humble, you often script the YAML generation in Python before launching the bridge.*
 
-## End-of-Lesson Checklist
+## 6. Real-World Example: Swarm Formation
 
-- [ ] I understand why namespaces are required for multi-robot systems.
-- [ ] I have modified my spawn script to accept a `name` argument.
-- [ ] I have created a launch file that spawns two distinct robots.
-- [ ] I have verified via `ros2 topic list` that topics are separated (e.g., `/bot1/...`).
+Research labs use this technique to test swarm algorithms. If you want to simulate a flock of 50 drones, you just loop `spawn_robot` 50 times.
+The limiting factor is usually the CPU physics, not ROS.
+
+## 7. Summary
+
+We have successfully cloned our robot. We now have `robot_alpha` and `robot_beta` existing in the same physical space but operating on independent data channels.
+In the next lesson, we will make things difficult for them by injecting faults.

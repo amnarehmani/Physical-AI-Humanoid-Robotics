@@ -17,8 +17,8 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create documentation structure docs/module-3/
-- [ ] T002 Create code directory structure code/module-3/isaac_sim/ code/module-3/isaac_ros/ code/module-3/nav2/
+- [x] T001 Create documentation structure docs/module-3/
+- [x] T002 Create code directory structure code/module-3/isaac_sim/ code/module-3/isaac_ros/ code/module-3/nav2/
 
 ---
 
@@ -26,9 +26,9 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T003 Create Lesson 1 placeholder file docs/module-3/lesson-1-isaac-sim.md
-- [ ] T004 Create Lesson 2 placeholder file docs/module-3/lesson-2-isaac-ros.md
-- [ ] T005 Create Lesson 3 placeholder file docs/module-3/lesson-3-nav2.md
+- [x] T003 Create Lesson 1 placeholder file docs/module-3/lesson-1-isaac-sim.md
+- [x] T004 Create Lesson 2 placeholder file docs/module-3/lesson-2-isaac-ros.md
+- [x] T005 Create Lesson 3 placeholder file docs/module-3/lesson-3-nav2.md
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -42,10 +42,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Write Lesson 1 Section: Introduction to Isaac Sim & USD in docs/module-3/lesson-1-isaac-sim.md
-- [ ] T007 [US1] Create load_humanoid.py in code/module-3/isaac_sim/load_humanoid.py
-- [ ] T008 [US1] Write Lesson 1 Section: Setting up the Environment (Nucleus Assets) in docs/module-3/lesson-1-isaac-sim.md
-- [ ] T009 [US1] Write Lesson 1 Section: Automating Scene Loading (Referencing script) in docs/module-3/lesson-1-isaac-sim.md
+- [x] T006 [P] [US1] Write Lesson 1 Section: Introduction to Isaac Sim & USD in docs/module-3/lesson-1-isaac-sim.md
+- [x] T007 [US1] Create load_humanoid.py in code/module-3/isaac_sim/load_humanoid.py
+- [x] T008 [US1] Write Lesson 1 Section: Setting up the Environment (Nucleus Assets) in docs/module-3/lesson-1-isaac-sim.md
+- [x] T009 [US1] Write Lesson 1 Section: Automating Scene Loading (Referencing script) in docs/module-3/lesson-1-isaac-sim.md
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -59,9 +59,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 [P] [US2] Write Lesson 2 Section: Hardware Acceleration & Isaac ROS in docs/module-3/lesson-2-isaac-ros.md
-- [ ] T011 [US2] Create visual_slam.launch.py in code/module-3/isaac_ros/visual_slam.launch.py
-- [ ] T012 [US2] Write Lesson 2 Section: Running Visual SLAM (Docker workflow) in docs/module-3/lesson-2-isaac-ros.md
+- [x] T010 [P] [US2] Write Lesson 2 Section: Hardware Acceleration & Isaac ROS in docs/module-3/lesson-2-isaac-ros.md
+- [x] T011 [US2] Create visual_slam.launch.py in code/module-3/isaac_ros/visual_slam.launch.py
+- [x] T012 [US2] Write Lesson 2 Section: Running Visual SLAM (Docker workflow) in docs/module-3/lesson-2-isaac-ros.md
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -75,10 +75,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T013 [P] [US3] Write Lesson 3 Section: The Navigation Stack (Nav2) in docs/module-3/lesson-3-nav2.md
-- [ ] T014 [US3] Create nav2_humanoid_params.yaml in code/module-3/nav2/nav2_humanoid_params.yaml
-- [ ] T015 [US3] Write Lesson 3 Section: Configuring Costmaps for Humanoids in docs/module-3/lesson-3-nav2.md
-- [ ] T016 [US3] Write Lesson 3 Section: Launching Navigation (Referencing config) in docs/module-3/lesson-3-nav2.md
+- [x] T013 [P] [US3] Write Lesson 3 Section: The Navigation Stack (Nav2) in docs/module-3/lesson-3-nav2.md
+- [x] T014 [US3] Create nav2_humanoid_params.yaml in code/module-3/nav2/nav2_humanoid_params.yaml
+- [x] T015 [US3] Write Lesson 3 Section: Configuring Costmaps for Humanoids in docs/module-3/lesson-3-nav2.md
+- [x] T016 [US3] Write Lesson 3 Section: Launching Navigation (Referencing config) in docs/module-3/lesson-3-nav2.md
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -88,9 +88,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T017 [P] Review all content for clarity and tone (Constitution check)
-- [ ] T018 Verify code examples logic (Note: Execution requires Nvidia hardware)
-- [ ] T019 Run quickstart.md validation manually
+- [x] T017 [P] Review all content for clarity and tone (Constitution check)
+- [x] T018 Verify code examples logic (Note: Execution requires Nvidia hardware)
+- [x] T019 Run quickstart.md validation manually
 
 ---
 

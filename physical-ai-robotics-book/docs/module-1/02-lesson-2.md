@@ -9,24 +9,63 @@ keywords:
   - rclpy
   - publisher
   - subscriber
+  - control
 ---
 
 # Lesson 2: Controlling the Body (Python)
 
-<h2>2.1 Introduction to `rclpy`</h2>
+## 1. Introduction
 
-`rclpy` (ROS Client Library for Python) is the tool we use to interface Python scripts with the ROS 2 core. It handles the complex networking (DDS - Data Distribution Service) so we can focus on logic.
+In the previous lesson, we built a single node—a lonely neuron firing into the void. Today, we build the synapse.
 
-In this lesson, we will build a "Brain" (Publisher) and a "Muscle" (Subscriber).
+The ability to transmit intent from one process to another is the definition of a distributed system. In humanoid robotics, this is not just about sending text; it is about transmitting the will to move from a high-level planner (The Brain) to a low-level motor controller (The Muscle). This lesson bridges the gap between thought and action using the **Publisher-Subscriber** pattern.
 
-<h2>2.2 The Publisher (The Brain)</h2>
+## 2. Conceptual Understanding: The Radio Station
 
-The Brain decides what to do. It sends commands out to the system.
+**Intuition**:
+Imagine a radio station broadcasting on 101.5 FM.
+*   **The Station (Publisher)**: It blasts music into the air. It does not know if you are listening. It does not know if you are in a tunnel. It just transmits.
+*   **The Car (Subscriber)**: It tunes into 101.5 FM. It receives the music. It cannot talk back to the station.
 
-<h3>Code Breakdown</h3>
-1.  **Import Message Type**: We need a standard format. We'll use `std_msgs.msg.String` for simple text.
-2.  **Create Publisher**: `self.create_publisher(Type, TopicName, QueueSize)`.
-3.  **Timer**: We don't want a `while True` loop blocking everything. We use a timer callback to publish at a fixed frequency (e.g., 1 Hz).
+**The "Topic"**:
+In ROS 2, the frequency (101.5 FM) is the **Topic**.
+*   If the Station broadcasts on "101.5" and the Car listens to "101.6", there is silence.
+*   If the Station broadcasts "Jazz" (Message Type A) and the Car expects "News" (Message Type B), there is confusion (or a crash).
+
+## 3. System Perspective: The Control Loop Architecture
+
+Before writing code, let's visualize the data pipeline we are building.
+
+```mermaid-text
++-----------------------+                    +-----------------------+
+|   Node: Brain (Pub)   |                    |  Node: Muscle (Sub)   |
++-----------------------+                    +-----------------------+
+|                       |                    |                       |
+|  [Timer: 1.0 sec]     |                    |   [Wait for Event]    |
+|         |             |                    |           |           |
+|         v             |                    |           v           |
+|   create_message()    |                    |    execute_command()  |
+|         |             |                    |           ^           |
+|         v             |      Topic         |           |           |
+|    publish(msg)       |------------------->|    (Callback)         |
+|                       |  "motor_commands"  |                       |
++-----------------------+                    +-----------------------+
+```
+
+### The Data Flow
+1.  **Trigger**: The Brain node has a timer tick (every 1s).
+2.  **Generation**: The Brain creates a string payload "Move Forward".
+3.  **Serialization**: `rclpy` converts Python string -> DDS Bytes.
+4.  **Transport**: DDS sends bytes over the network stack (localhost).
+5.  **Deserialization**: `rclpy` converts DDS Bytes -> Python string.
+6.  **Callback**: The Muscle node interrupts its sleep to run `execute_command()`.
+
+## 4. Practical Example: Implementing the Nervous System
+
+We will implement two separate Python scripts. They will run as independent processes.
+
+### 4.1 The Brain (Publisher)
+This node represents the cognitive layer. It decides *what* to do.
 
 ```python title="code/module-1/publisher.py"
 import rclpy
@@ -37,46 +76,42 @@ class BrainNode(Node):
     def __init__(self):
         super().__init__('brain_node')
         
-        # Create a publisher that sends Strings to the 'motor_commands' topic
-        # The '10' is the queue size (buffer)
+        # 1. Create a publisher
+        # Type: String (The message format)
+        # Topic Name: 'motor_commands' (The frequency)
+        # Queue Size: 10 (Buffer size if network is busy)
         self.publisher_ = self.create_publisher(String, 'motor_commands', 10)
         
-        # Create a timer that fires every 1.0 seconds
-        self.timer = self.create_timer(1.0, self.send_command)
-        self.counter = 0
+        # 2. Create a timer to fire every 1.0 seconds
+        self.timer = self.create_timer(1.0, self.timer_callback)
+        self.i = 0
 
-    def send_command(self):
+    def timer_callback(self):
         msg = String()
-        msg.data = f'Move Forward step {self.counter}'
+        msg.data = f'Step Forward {self.i}'
         
-        # Publish the message
+        # 3. Publish the message
         self.publisher_.publish(msg)
-        
-        self.get_logger().info(f'Brain sending: "{msg.data}"')
-        self.counter += 1
+        self.get_logger().info(f'Brain Publishing: "{msg.data}"')
+        self.i += 1
 
 def main(args=None):
     rclpy.init(args=args)
-    node = BrainNode()
+    brain_node = BrainNode()
     try:
-        rclpy.spin(node)
+        rclpy.spin(brain_node)
     except KeyboardInterrupt:
         pass
     finally:
-        node.destroy_node()
+        brain_node.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
 ```
 
-<h2>2.3 The Subscriber (The Muscle)</h2>
-
-The Muscle doesn't think; it waits for orders.
-
-<h3>Code Breakdown</h3>
-1.  **Create Subscription**: `self.create_subscription(Type, TopicName, Callback, QueueSize)`.
-2.  **Callback**: This function `execute_command(self, msg)` is triggered *automatically* whenever a new message arrives.
+### 4.2 The Muscle (Subscriber)
+This node represents the actuation layer. It executes orders.
 
 ```python title="code/module-1/subscriber.py"
 import rclpy
@@ -87,51 +122,59 @@ class MuscleNode(Node):
     def __init__(self):
         super().__init__('muscle_node')
         
-        # Listen to the 'motor_commands' topic
+        # 1. Create subscription
         self.subscription = self.create_subscription(
-            String,
-            'motor_commands',
-            self.execute_command,
-            10)
-        # Prevent unused variable warning
-        self.subscription 
+            String,             # Must match Publisher type
+            'motor_commands',   # Must match Publisher topic
+            self.listener_callback,
+            10)                 # Queue size
+        
+        self.subscription  # Prevent unused variable warning
 
-    def execute_command(self, msg):
-        # This function runs every time the Brain sends a message
-        self.get_logger().info(f'Muscle received: "{msg.data}" -> FLEXING MUSCLES!')
+    def listener_callback(self, msg):
+        # 2. React to the message
+        # This function runs AUTOMATICALLY when data arrives
+        self.get_logger().info(f'Muscle Received: "{msg.data}" -> FLEXING LEG!')
 
 def main(args=None):
     rclpy.init(args=args)
-    node = MuscleNode()
+    muscle_node = MuscleNode()
     try:
-        rclpy.spin(node)
+        rclpy.spin(muscle_node)
     except KeyboardInterrupt:
         pass
     finally:
-        node.destroy_node()
+        muscle_node.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
 ```
 
-<h2>2.4 Hands-On: Connecting the Nervous System</h2>
+## 5. Engineering Insights: Latency and Safety
 
-To see this work, we need **two terminal windows**.
+In a toy example, we send strings every second. In a real humanoid, we send `JointTrajectory` messages at 500Hz.
 
-1.  **Terminal 1 (The Muscle)**:
-    ```bash
-    python3 subscriber.py
-    ```
-    *It will sit waiting. Silence.*
+### 5.1 The Latency Budget
+If the "Brain" sees an obstacle and publishes "STOP", that message travels through:
+1.  Brain Node Serialization overhead.
+2.  OS Network Stack latency.
+3.  Muscle Node Deserialization overhead.
+4.  Muscle Node Callback execution time.
 
-2.  **Terminal 2 (The Brain)**:
-    ```bash
-    python3 publisher.py
-    ```
+If this total time > 100ms, the robot might hit the obstacle before the brakes engage. This is why we keep callbacks **short** and **non-blocking**.
 
-**Result**:
-*   Terminal 2 prints: `[INFO]: Brain sending: "Move Forward step 0"`
-*   Terminal 1 *immediately* prints: `[INFO]: Muscle received: "Move Forward step 0" -> FLEXING MUSCLES!`
+### 5.2 Threading and Blocking
+**CRITICAL RULE**: Never use `time.sleep()` or `while(True)` inside a callback.
+*   If `listener_callback` sleeps for 5 seconds, the node stops "hearing" new messages for 5 seconds.
+*   The queue fills up (up to 10 messages).
+*   The 11th message (which might be "Emergency Stop") is dropped.
 
-You have just created a distributed computing system. These two scripts could theoretically be on different continents connected via VPN, and the logic would be identical.
+## 6. Summary
+
+You have built the communication backbone of your robot.
+1.  **Publishers** broadcast intent.
+2.  **Subscribers** react to intent.
+3.  **Callbacks** are the event-driven functions that handle data.
+
+We have a brain and a muscle. Now we need a skeleton. In the next lesson, we will define the robot's physical structure using URDF.

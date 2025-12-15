@@ -79,12 +79,12 @@ const config = {
             label: 'Modules', // Changed label from 'Book' to 'Modules'
           },
           {to: '/#about-book', label: 'About', position: 'left'}, // Link to about section on homepage
-          {to: '/docs/appendix', label: 'Appendix', position: 'left'}, // Link to appendix
           {
             href: 'https://github.com/your-org/physical-ai-robotics-book', // Specific project repo
             label: 'GitHub',
             position: 'right',
           },
+
         ],
       },
       footer: {

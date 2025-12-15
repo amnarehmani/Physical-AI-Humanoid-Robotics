@@ -136,9 +136,9 @@ const sidebars = {
           items: [
             'module-3/00-intro',
             'module-3/01-lesson-1',
-            'module-3/lesson-2',
-            'module-3/lesson-3',
-            'module-3/summary',
+            'module-3/02-lesson-2',
+            'module-3/03-lesson-3',
+            'module-3/04-summary',
           ],
         },
         {

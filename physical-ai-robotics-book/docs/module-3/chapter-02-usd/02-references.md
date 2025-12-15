@@ -12,37 +12,65 @@ keywords:
 
 # Lesson 2: References and Payloads
 
-## The "Import" Trap
+## 1. Introduction
 
-In traditional CAD, you "Import" a file. It copies the data into your scene. If the original file changes, your scene is outdated.
-In USD, we use **References**. It points to the file. If the original updates, your scene updates instantly.
+The power of USD lies in **Composition**.
+Instead of building a robot from scratch every time, we build a library of parts (Wheels, Sensors, Motors) and compose them together.
 
-## Adding a Reference
+## 2. Conceptual Understanding: The Reference Arc
+
+A **Reference** is a pointer.
+*   **Asset**: `wheel.usd` (Contains the mesh and physics of a wheel).
+*   **Robot**: `robot.usd` (References `wheel.usd` 4 times).
+
+If we update `wheel.usd` to have better tire treads, `robot.usd` updates automatically.
+
+### Reference vs Payload
+*   **Reference**: "I need this data to function." (Always loaded).
+*   **Payload**: "I might need this data." (Deferred loading).
+    *   Use Payloads for heavy background assets (buildings, trees). You can unload them to save RAM while working on the robot.
+
+## 3. Implementation: Python References
 
 ```python
-from omni.isaac.core.utils.prims import define_prim
+from omni.isaac.core.utils.stage import add_reference_to_stage
 
-# Create an empty container
-prim = define_prim("/World/Robot1", "Xform")
+# The path to the Asset
+asset_path = "omniverse://localhost/Assets/Robots/Carter/carter_v1.usd"
 
-# Reference a USD file into it
-prim.GetReferences().AddReference("path/to/robot.usd")
+# 1. Reference it
+add_reference_to_stage(usd_path=asset_path, prim_path="/World/Carter_1")
+
+# 2. Reference it AGAIN (Instancing)
+add_reference_to_stage(usd_path=asset_path, prim_path="/World/Carter_2")
 ```
 
-## Payloads: The Lazy Loader
+Now we have two robots. They share the same underlying data on disk.
 
-A **Payload** is a "weak" Reference. You can choose *not* to load it.
-Imagine a city scene with 100 buildings. You only need to work on Building A.
-If used Payloads, you can "Unload" the other 99 buildings. They disappear from memory but stay in the scene hierarchy. This allows massive scenes to run on a single GPU.
+## 4. Engineering Insights: Deltas (Overrides)
 
-## Overrides
+We can modify a referenced object. This creates a **Delta**.
 
-You can reference a standard "Red Car" and then, in your scene, change its color to Blue. This is an **Override**.
-It does not change the original file. It writes a small "opinion" in your current layer: "For this instance of Red Car, color = Blue."
+```python
+from pxr import UsdGeom, Gf
 
-## End-of-Lesson Checklist
+# Get the second robot
+prim = stage.GetPrimAtPath("/World/Carter_2")
+xform = UsdGeom.XformCommonAPI(prim)
 
-- [ ] I understand the difference between Copying and Referencing.
-- [ ] I can add a Reference to a Prim via Python.
-- [ ] I know why Payloads are useful for large scenes.
-- [ ] I have successfully overridden a property of a referenced asset.
+# Move it (This overrides the position from the original file)
+xform.SetTranslate(Gf.Vec3d(2.0, 0.0, 0.0))
+```
+
+The original `carter_v1.usd` says "Position = 0,0,0".
+Our stage says "For Carter_2, Position = 2,0,0".
+USD composes these opinions to place the robot.
+
+## 5. Summary
+
+References allow us to build modular, reusable assets.
+*   **References** link files together.
+*   **Payloads** allow lazy loading for performance.
+*   **Deltas** allow us to customize instances without breaking the original asset.
+
+In the next lesson, we will learn how to make these static meshes move using the **Physics API**.

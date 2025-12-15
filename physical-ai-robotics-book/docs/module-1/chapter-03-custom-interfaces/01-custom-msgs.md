@@ -8,117 +8,122 @@ keywords:
   - msg
   - srv
   - cmake
+  - build system
 ---
 
 # Lesson 1: Defining Custom Messages
 
-## Why Custom Messages?
+## 1. Introduction
 
-ROS 2 comes with `std_msgs` (String, Int32), `geometry_msgs` (Point, Pose), and `sensor_msgs` (Image, LaserScan).
-However, mixing and matching these often leads to semantic confusion. sending a `Vector3` to represent "RGB Color" is bad practice. Instead, define a `Color` message.
+In previous chapters, we used `std_msgs/String` to send text and `example_interfaces` for our services. While convenient for tutorials, real robots rarely speak in simple strings.
 
-## Creating an Interface Package
+A robot doesn't just say "Face Detected." It says: "Face #42 detected at (X,Y) with 95% confidence."
+Trying to shove all this into a String is messy (parsing JSON at 100Hz is slow). Sending three separate messages (ID, Pos, Confidence) introduces synchronization bugs (did this ID match that Position?).
 
-It is best practice to keep message definitions in a separate package (e.g., `my_robot_interfaces`) to avoid circular dependencies.
+The solution is **Custom Interfaces**. We will define a structured data type that perfectly matches our domain needs.
 
-1.  **Create the package**:
-    ```bash
-    ros2 pkg create --build-type ament_cmake my_robot_interfaces
-    ```
-2.  **Create directories**:
-    ```bash
-    mkdir msg srv action
-    ```
+## 2. Conceptual Understanding: The Data Contract
 
-## Defining a Message (.msg)
+**Intuition**:
+Think of a Custom Message as a **Form** you fill out.
+*   **Standard Message (`String`)**: A blank sheet of paper. You can write anything, but the receiver has to read your handwriting.
+*   **Custom Message (`FaceDetection`)**: A printed form with boxes for "ID", "Name", and "Coordinates". The receiver knows exactly where to look for the data.
 
-Create `msg/TargetCoordinates.msg`:
+**Mechanism**:
+ROS 2 uses an **IDL (Interface Definition Language)** to define these forms.
+1.  **Definition**: You write a `.msg` file (language neutral).
+2.  **Generation**: The build system (CMake) reads this file and generates Python classes (`module.py`) and C++ headers (`module.hpp`).
+3.  **Usage**: You import these classes just like any other library.
+
+## 3. System Perspective: The Build Pipeline
+
+Creating a custom message is more involved than writing a Python script because it requires **Compilation**.
+
+```mermaid-text
+[Developer]
+    |
+    v
+(1) Write "MyMessage.msg"
+    |
+    v
+[CMake Build System (colcon)]
+    |
+    +---> [rosidl_generator_cpp] ---> Generates .hpp files (C++)
+    |
+    +---> [rosidl_generator_py]  ---> Generates .py files (Python)
+    |
+    v
+[Your Node] <--- Imports generated code
+```
+
+## 4. Practical Example: The "Target Coordinates" Message
+
+We will create a message to represent a detected object in 3D space.
+
+### Step 1: The Package
+It is best practice to keep interfaces in a separate package to avoid circular dependencies.
+```bash
+ros2 pkg create --build-type ament_cmake my_robot_interfaces
+mkdir -p my_robot_interfaces/msg
+```
+
+### Step 2: The Definition
+Create `my_robot_interfaces/msg/TargetCoordinates.msg`.
 
 ```text
-# ID of the detected target
+# Unique ID of the target
 int32 id
 
-# Name of the target
+# Descriptive name (e.g. "Coffee Cup")
 string name
 
-# Position in space
+# Position in 3D space (Nest standard messages!)
 geometry_msgs/Point position
 
-# Confidence score (0.0 to 1.0)
+# Detection confidence (0.0 - 1.0)
 float32 confidence
 ```
 
-Notice we can nest other messages (`geometry_msgs/Point`) inside ours.
+### Step 3: The Build Configuration
+This is the tricky part. We must tell CMake to process this file.
 
-## Defining a Service (.srv)
-
-Create `srv/SetLedColor.srv`:
-
-```text
-# Request
-string color
-bool blink
----
-# Response
-bool success
-string message
-```
-
-## Configuring Build System
-
-To turn these text files into Python/C++ code, we edit `CMakeLists.txt` and `package.xml`.
-
-### package.xml
-Add these lines:
+**package.xml**:
 ```xml
 <build_depend>rosidl_default_generators</build_depend>
 <exec_depend>rosidl_default_runtime</exec_depend>
 <member_of_group>rosidl_interface_packages</member_of_group>
-<depend>geometry_msgs</depend> <!-- Because we used it -->
+<depend>geometry_msgs</depend>
 ```
 
-### CMakeLists.txt
-Before `ament_package()`:
-
+**CMakeLists.txt**:
 ```cmake
 find_package(rosidl_default_generators REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/TargetCoordinates.msg"
-  "srv/SetLedColor.srv"
   DEPENDENCIES geometry_msgs
 )
 ```
 
-## Compilation
-
-Run `colcon build --packages-select my_robot_interfaces`.
-Source the workspace: `source install/setup.bash`.
-
-## Verify
-
-Check if ROS sees your new type:
+### Step 4: Compile and Verify
 ```bash
+colcon build --packages-select my_robot_interfaces
+source install/setup.bash
 ros2 interface show my_robot_interfaces/msg/TargetCoordinates
 ```
-*Output should match your definition.*
 
-## Using it in Python
+## 5. Engineering Insights: Build System Nuances
 
-```python
-from my_robot_interfaces.msg import TargetCoordinates
+*   **Why a separate package?**: If `Node A` uses `Message B`, and `Message B` is defined inside `Node A`'s package, you often get build errors. Separating `my_robot_interfaces` allows both `Node A` and `Node B` to depend on the *messages* without depending on each other's *code*.
+*   **The "Clean" Build**: If ROS 2 acts like it can't find your message even after you fixed a typo, delete the `build/` and `install/` folders and rebuild. The code generator sometimes caches old definitions.
+*   **Nesting**: Always reuse standard messages (`geometry_msgs/Point`, `std_msgs/Header`) inside your custom messages. Don't reinvent `x, y, z` if a standard type exists. This makes your code compatible with other tools (like Rviz).
 
-msg = TargetCoordinates()
-msg.id = 1
-msg.name = "Coffee Cup"
-msg.confidence = 0.95
-publisher.publish(msg)
-```
+## 6. Summary
 
-## End-of-Lesson Checklist
+You have learned to extend the language of ROS 2.
+1.  **Define** data structures in `.msg` files.
+2.  **Configure** `CMakeLists.txt` to generate code.
+3.  **Compile** the package to make it available.
 
-- [ ] I have created a dedicated package for interfaces.
-- [ ] I have written a `.msg` file combining primitives and other messages.
-- [ ] I have successfully compiled the package using `colcon build`.
-- [ ] I can import the new message type in a Python script.
+Now that we have a structured way to represent a "Target," we need to know *where* that target is. Is it relative to the camera? The floor? The gripper? For that, we need **TF2 Transforms**.

@@ -42,9 +42,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Write Lesson 1 Section: Intro to ASR and OpenAI Whisper in docs/module-4/lesson-1-voice.md
+- [x] T006 [P] [US1] Write Lesson 1 Section: Intro to ASR and OpenAI Whisper in docs/module-4/lesson-1-voice.md
 - [ ] T007 [US1] Create whisper_node.py in code/module-4/voice/whisper_node.py
-- [ ] T008 [US1] Write Lesson 1 Section: Creating the Ear Node (Code walkthrough) in docs/module-4/lesson-1-voice.md
+- [x] T008 [US1] Write Lesson 1 Section: Creating the Ear Node (Code walkthrough) in docs/module-4/lesson-1-voice.md
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -58,9 +58,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T009 [P] [US2] Write Lesson 2 Section: The Cognitive Loop & LLMs in docs/module-4/lesson-2-llm-planning.md
+- [x] T009 [P] [US2] Write Lesson 2 Section: The Cognitive Loop & LLMs in docs/module-4/lesson-2-llm-planning.md
 - [ ] T010 [US2] Create llm_planner.py in code/module-4/planning/llm_planner.py
-- [ ] T011 [US2] Write Lesson 2 Section: Prompt Engineering for Robotics in docs/module-4/lesson-2-llm-planning.md
+- [x] T011 [US2] Write Lesson 2 Section: Prompt Engineering for Robotics in docs/module-4/lesson-2-llm-planning.md
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -74,10 +74,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T012 [P] [US3] Write Lesson 3 Section: System Architecture (Diagrams) in docs/module-4/lesson-3-capstone.md
+- [x] T012 [P] [US3] Write Lesson 3 Section: System Architecture (Diagrams) in docs/module-4/lesson-3-capstone.md
 - [ ] T013 [US3] Create executive_node.py in code/module-4/execution/executive_node.py (Mock execution)
-- [ ] T014 [US3] Write Lesson 3 Section: The Executive Node (State Machine) in docs/module-4/lesson-3-capstone.md
-- [ ] T015 [US3] Write Lesson 3 Section: Putting it All Together (Launch instructions) in docs/module-4/lesson-3-capstone.md
+- [x] T014 [US3] Write Lesson 3 Section: The Executive Node (State Machine) in docs/module-4/lesson-3-capstone.md
+- [x] T015 [US3] Write Lesson 3 Section: Putting it All Together (Launch instructions) in docs/module-4/lesson-3-capstone.md
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -87,7 +87,7 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T016 [P] Review all content for clarity and tone (Constitution check)
+- [x] T016 [P] Review all content for clarity and tone (Constitution check)
 - [ ] T017 Verify code examples run (requires OpenAI API Key)
 - [ ] T018 Run quickstart.md validation manually
 

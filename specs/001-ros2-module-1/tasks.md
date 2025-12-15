@@ -42,10 +42,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Write Lesson 1 Section: Introduction to the Nervous System Metaphor in docs/module-1/lesson-1-architecture.md
-- [ ] T007 [P] [US1] Write Lesson 1 Section: The Computing Graph (Nodes, Topics, Services) in docs/module-1/lesson-1-architecture.md
-- [ ] T008 [US1] Implement simple_node.py in code/module-1/simple_node.py
-- [ ] T009 [US1] Write Lesson 1 Section: Running Your First Node (Referencing simple_node.py) in docs/module-1/lesson-1-architecture.md
+- [X] T006 [P] [US1] Write Lesson 1 Section: Introduction to the Nervous System Metaphor in docs/module-1/lesson-1-architecture.md
+- [X] T007 [P] [US1] Write Lesson 1 Section: The Computing Graph (Nodes, Topics, Services) in docs/module-1/lesson-1-architecture.md
+- [X] T008 [US1] Implement simple_node.py in code/module-1/simple_node.py
+- [X] T009 [US1] Write Lesson 1 Section: Running Your First Node (Referencing simple_node.py) in docs/module-1/lesson-1-architecture.md
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -59,10 +59,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T010 [P] [US2] Write Lesson 2 Section: Python Control (rclpy basics) in docs/module-1/lesson-2-control.md
-- [ ] T011 [US2] Implement publisher.py in code/module-1/publisher.py
-- [ ] T012 [US2] Implement subscriber.py in code/module-1/subscriber.py
-- [ ] T013 [US2] Write Lesson 2 Section: The Publisher-Subscriber Pattern (Referencing code examples) in docs/module-1/lesson-2-control.md
+- [X] T010 [P] [US2] Write Lesson 2 Section: Python Control (rclpy basics) in docs/module-1/lesson-2-control.md
+- [X] T011 [US2] Implement publisher.py in code/module-1/publisher.py
+- [X] T012 [US2] Implement subscriber.py in code/module-1/subscriber.py
+- [X] T013 [US2] Write Lesson 2 Section: The Publisher-Subscriber Pattern (Referencing code examples) in docs/module-1/lesson-2-control.md
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -76,10 +76,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T014 [P] [US3] Write Lesson 3 Section: What is URDF? in docs/module-1/lesson-3-urdf.md
-- [ ] T015 [P] [US3] Write Lesson 3 Section: Humanoid Kinematics (Links & Joints) in docs/module-1/lesson-3-urdf.md
-- [ ] T016 [US3] Implement simple_humanoid.urdf in code/module-1/simple_humanoid.urdf
-- [ ] T017 [US3] Write Lesson 3 Section: Visualizing the Body (Referencing simple_humanoid.urdf) in docs/module-1/lesson-3-urdf.md
+- [X] T014 [P] [US3] Write Lesson 3 Section: What is URDF? in docs/module-1/lesson-3-urdf.md
+- [X] T015 [P] [US3] Write Lesson 3 Section: Humanoid Kinematics (Links & Joints) in docs/module-1/lesson-3-urdf.md
+- [X] T016 [US3] Implement simple_humanoid.urdf in code/module-1/simple_humanoid.urdf
+- [X] T017 [US3] Write Lesson 3 Section: Visualizing the Body (Referencing simple_humanoid.urdf) in docs/module-1/lesson-3-urdf.md
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -89,9 +89,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T018 [P] Review all content for clarity and tone (Constitution check)
-- [ ] T019 Verify code examples run on ROS 2 Foxy/Humble (Constitution check)
-- [ ] T020 Run quickstart.md validation manually
+- [X] T018 [P] Review all content for clarity and tone (Constitution check)
+- [X] T019 Verify code examples run on ROS 2 Foxy/Humble (Constitution check)
+- [X] T020 Run quickstart.md validation manually
 
 ---
 
