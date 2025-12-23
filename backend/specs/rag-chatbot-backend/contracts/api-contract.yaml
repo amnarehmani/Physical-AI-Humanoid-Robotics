@@ -1,0 +1,269 @@
+# API Contracts: RAG Chatbot Backend
+
+## OpenAPI Specification
+
+```yaml
+openapi: 3.0.0
+info:
+  title: RAG Chatbot Backend API
+  description: API for Retrieval-Augmented Generation backend that enables Q&A over book content
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /ingest:
+    post:
+      summary: Ingest book content for RAG processing
+      description: Accepts Markdown/MDX book content, processes it into chunks, and stores embeddings
+      operationId: ingest_content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+      responses:
+        '200':
+          description: Content successfully ingested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /query:
+    post:
+      summary: Query book content globally
+      description: Accepts user questions and returns answers based on ingested book content
+      operationId: query_content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Query processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /query/selection:
+    post:
+      summary: Query using selected text only
+      description: Accepts user-selected text and question, bypasses vector store entirely
+      operationId: query_selection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectionQueryRequest'
+      responses:
+        '200':
+          description: Query processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelectionQueryResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    IngestRequest:
+      type: object
+      required:
+        - content
+        - source_path
+        - title
+      properties:
+        content:
+          type: string
+          description: The book content in Markdown/MDX format
+          example: "# Introduction\nThis is the introduction to the book..."
+        source_path:
+          type: string
+          description: The path from which the content was sourced
+          example: "/docs/intro.md"
+        title:
+          type: string
+          description: The title of the document
+          example: "Introduction to RAG Systems"
+    
+    IngestResponse:
+      type: object
+      required:
+        - status
+        - message
+        - document_id
+        - chunks_processed
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+          example: "success"
+        message:
+          type: string
+          example: "Content successfully ingested"
+        document_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        chunks_processed:
+          type: integer
+          example: 25
+    
+    QueryRequest:
+      type: object
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          description: The user's question about the book content
+          example: "What are the key principles of RAG systems?"
+        session_id:
+          type: string
+          description: Optional session identifier for continuity
+          example: "session-123"
+    
+    QueryResponse:
+      type: object
+      required:
+        - question
+        - answer
+        - retrieved_chunks
+        - confidence
+      properties:
+        question:
+          type: string
+          example: "What are the key principles of RAG systems?"
+        answer:
+          type: string
+          example: "The key principles of RAG systems include..."
+        retrieved_chunks:
+          type: array
+          items:
+            $ref: '#/components/schemas/RetrievedChunk'
+        confidence:
+          type: string
+          enum: [high, medium, low]
+          example: "high"
+    
+    SelectionQueryRequest:
+      type: object
+      required:
+        - selected_text
+        - question
+      properties:
+        selected_text:
+          type: string
+          description: Text selected by the user
+          maxLength: 10240  # 10KB limit
+          example: "RAG systems combine retrieval and generation to improve accuracy..."
+        question:
+          type: string
+          description: Question about the selected text
+          example: "How does this approach improve accuracy?"
+    
+    SelectionQueryResponse:
+      type: object
+      required:
+        - question
+        - answer
+        - confidence
+        - sufficient_information
+      properties:
+        question:
+          type: string
+          example: "How does this approach improve accuracy?"
+        answer:
+          type: string
+          example: "This approach improves accuracy by..."
+        confidence:
+          type: string
+          enum: [high, medium, low]
+          example: "medium"
+        sufficient_information:
+          type: boolean
+          example: true
+    
+    RetrievedChunk:
+      type: object
+      required:
+        - chunk_id
+        - content
+        - source_document
+        - section_title
+      properties:
+        chunk_id:
+          type: string
+          example: "chunk-123"
+        content:
+          type: string
+          example: "RAG systems combine retrieval and generation to improve accuracy..."
+        source_document:
+          type: string
+          example: "Introduction to RAG Systems"
+        section_title:
+          type: string
+          example: "Key Principles"
+    
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+        - error_code
+      properties:
+        status:
+          type: string
+          enum: [error]
+          example: "error"
+        message:
+          type: string
+          example: "Invalid request format"
+        error_code:
+          type: string
+          example: "INVALID_INPUT"
+```

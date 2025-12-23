@@ -1,0 +1,9 @@
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+cohere>=4.0.0
+qdrant-client>=1.6.0
+asyncpg>=0.28.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+PyYAML>=6.0.0
+bleach>=6.0.0

@@ -18,6 +18,9 @@
     "@docusaurus/preset-classic": "3.9.2",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "openai": "^6.15.0",
     "prism-react-renderer": "^2.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -25,6 +28,15 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/types": "3.9.2"
+  },
+  "proxy": {
+    "/api": {
+      "target": "http://localhost:3001",
+      "secure": false,
+      "changeOrigin": true
+    },
+    "/query": "http://127.0.0.1:8000",
+    "/query/selection": "http://127.0.0.1:8000"
   },
   "browserslist": {
     "production": [
